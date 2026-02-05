@@ -4,7 +4,7 @@ Some parts of the implementation were inspired by the [utdrwiki/discussion](http
 
 This extension is in BETA. It has been tested on MediaWiki 1.46 and Discourse Latest. Best results on [Citizen](https://www.mediawiki.org/wiki/Skin:Citizen), Vector22 tested and working.
 
-Replaces the Discussion/Talk Page button with a link to your Discourse forum and adds up to 3 related posts from your Discourse forum to the bottom of the page like the RelatedArticles extension. Currently only available in English.
+Replaces the Discussion/Talk Page button with a link to your Discourse forum and adds up to 3 related posts from your Discourse forum to the bottom of the page like the RelatedArticles extension. Currently only available in English. This extension does not act as a bridge between MediaWiki SSO and Discourse SSO. Depending on your Discourse instance's configuration, you may be able to use dummy variables for the API key and username.
 
 ## Requirements
 
@@ -37,3 +37,11 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 * `$wgDiscourseSquarePFPsForUsersWithTitles` - default [] - Use square profile pictures instead of rounded for users with certain titles.
 * `$wgDiscourseUseNoFollowOnForumLinks` - default FALSE - Add nofollow to all links to the forum. Not recommended for SEO.
 * `$wgDiscourseOpenForumLinksInNewTab` - default TRUE - Open all links to the forum in a new tab using `_blank`, otherwise uses the default behavior of the browser.
+
+## TODO
+* Add support for other languages
+* Fix secondary topic requests not working on some versions/instances/configs
+* Improve loading times
+* Improve styling for post cards on larger screens
+* Better topic sorting controls
+* Potentially delay paint until user scrols to the bottom like RelatedArticles (?)

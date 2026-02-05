@@ -188,7 +188,7 @@ HTML;
 		$heading = wfMessage( 'discourseintegration-related-posts' )->escaped();
 
 		return <<<HTML
-<aside class="noprint" style="max-width: var(--width-page, 100%); margin: 2em auto;">
+<aside class="noprint" style="max-width: var(--width-page, 100%); margin: 2em auto; padding-inline: var(--padding-page);">
 	<h2 class="read-more-container-heading" style="margin-bottom: 16px;">$heading</h2>
 	<ul style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; list-style: none; margin: 0; padding: 0;">
 		$listItems
@@ -198,7 +198,7 @@ HTML;
 	}
 
 	private function getRelatedPosts( string $term ): array {
-		$key = $this->cache->makeKey( 'discourse-related-posts', md5( $term ), 'v13' );
+		$key = $this->cache->makeKey( 'discourse-related-posts', md5( $term ), 'v16' );
 
 		return $this->cache->getWithSetCallback(
 			$key,
@@ -245,6 +245,8 @@ HTML;
                     $slug = $candidate['topic_slug'] ?? 'topic';
                     $id = $candidate['topic_id'];
                     $topicUrl = "$baseUrl/t/$slug/$id.json";
+                    
+                    $success = false;
 
                     $topicReq = $this->httpRequestFactory->create( $topicUrl, [
                         'method' => 'GET',
@@ -255,30 +257,41 @@ HTML;
                     ] );
 
                     $topicStatus = $topicReq->execute();
-                    if ( !$topicStatus->isOK() ) {
-                        continue;
-                    }
+                    if ( $topicStatus->isOK() ) {
+                        $topicData = json_decode( $topicReq->getContent(), true );
+                        
+                        if ( is_array( $topicData ) && isset( $topicData['post_stream']['posts'][0] ) ) {
+                            // post_stream.posts[0] is the OP
+                            $firstPost = $topicData['post_stream']['posts'][0];
 
-                    $topicData = json_decode( $topicReq->getContent(), true );
+                            $cooked = $firstPost['cooked'] ?? '';
+                            $blurb = trim( html_entity_decode( strip_tags( $cooked ) ) );
+                            $blurb = preg_replace( '/\s+/', ' ', $blurb );
+                            $firstPost['blurb'] = $blurb;
+                            
+                            // tags
+                            $searchTopicData = $topicsMap[$id] ?? [];
+                            $tags = $searchTopicData['tags'] ?? [];
+                            
+                            $results[] = [
+                                'topic' => $topicData, 
+                                'post' => $firstPost,
+                                'tags' => $tags
+                            ];
+                            $success = true;
+                        }
+                    } 
                     
-                    // post_stream.posts[0] is the OP
-                    $firstPost = $topicData['post_stream']['posts'][0] ?? null;
-
-                    if ( $firstPost ) {
-                        $cooked = $firstPost['cooked'] ?? '';
-                        $blurb = trim( html_entity_decode( strip_tags( $cooked ) ) );
-                        $blurb = preg_replace( '/\s+/', ' ', $blurb );
-                        $firstPost['blurb'] = $blurb;
-                        
-                        // tags
-                        $searchTopicData = $topicsMap[$id] ?? [];
-                        $tags = $searchTopicData['tags'] ?? [];
-                        
-                        $results[] = [
-                            'topic' => $topicData, 
-                            'post' => $firstPost,
-                            'tags' => $tags
-                        ];
+                    if ( !$success ) {
+                        // fallback to searching data
+                        $topic = $topicsMap[$id] ?? null;
+                        if ( $topic ) {
+                            $results[] = [
+                                'topic' => $topic, 
+                                'post' => $candidate,
+                                'tags' => $topic['tags'] ?? []
+                            ];
+                        }
                     }
                 }
 				
