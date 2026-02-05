@@ -1,0 +1,106 @@
+{
+	"manifest_version": 2,
+    "config_prefix": "wg",
+    "name": "DiscourseIntegration",
+    "description": "Integrates Discourse with MediaWiki",
+    "author": ["ObbyWiki", "WOU", "Wolfite"],
+    "version": "0.0.1",
+    "license-name": "MIT",
+    "url": "https://github.com/obbywiki/mediawiki-extensions-DiscourseIntegration",
+
+    "type": "parserhook",
+
+    "requires": {
+        "MediaWiki": ">=1.43.0"
+    },
+
+    "suggests": {
+        "extensions": {
+            "RelatedArticles": ">= 1.45.0"
+        }
+    },
+
+    "MessagesDirs": {
+        "DiscourseIntegration": [
+            "i18n"
+        ]
+    },
+
+    "AutoloadClasses": {
+        "MediaWiki\\Extension\\DiscourseIntegration\\Hooks": "src/Hooks.php",
+        "MediaWiki\\Extension\\DiscourseIntegration\\ExtensionConfig": "src/ExtensionConfig.php",
+        "MediaWiki\\Extension\\DiscourseIntegration\\RelatedPosts": "src/RelatedPosts.php"
+    },
+
+    "ServiceWiringFiles": [
+        "src/ServiceWiring.php"
+    ],
+
+    "HookHandlers": {
+        "DiscourseIntegrationHooks": {
+            "class": "MediaWiki\\Extension\\DiscourseIntegration\\Hooks",
+            "services": [
+                "DiscourseIntegrationConfig"
+            ]
+        }
+    },
+
+    "Hooks": {
+        "SkinTemplateNavigation::Universal": "DiscourseIntegrationHooks",
+        "SkinAfterContent": "MediaWiki\\Extension\\DiscourseIntegration\\RelatedPosts::onSkinAfterContentStatic"
+    },
+
+    "ResourceModules": {
+        "ext.DiscourseIntegration.styles": {
+            "styles": "resources/styles.css",
+            "targets": [ "desktop", "mobile" ]
+        }
+    },
+
+    "config": {
+		"DiscourseReplaceTalkPages": {
+			"value": true,
+			"description": "Replace talk pages with Discourse threads."
+		},
+        "DiscourseBaseURL": {
+            "value": "https://discourse.example.com",
+            "description": "Base URL of the Discourse instance. Do not include trailing slash."
+        },
+        "DiscourseAPIKey": {
+            "value": "",
+            "description": "API key for the Discourse instance. Must be global with read/write permissions."
+        },
+        "DiscourseAPIUsername": {
+            "value": "system",
+            "description": "Username used to process all API requests."
+        },
+        "DiscourseTargetNamespaces": {
+            "value": [0],
+            "description": "Namespaces to replace talk page buttons with Discourse threads and show related posts."
+        },
+        "DiscourseTargetSkins": {
+            "value": ["citizen","vector","vector-2022"],
+            "description": "Skins (in lowercase) to replace talk page buttons with Discourse threads and show related posts."
+        },
+        "DiscourseExcludeStrings": {
+            "value": [],
+            "description": "List of strings. If a page title contains any of these, the talk page link will NOT be replaced."
+        },
+        "DiscourseSquarePFPsForAll": {
+			"value": false,
+			"description": "Use square profile pictures instead of rounded."
+		},
+        "DiscourseSquarePFPsForUsersWithTitles": {
+			"value": [],
+			"description": "Use square profile pictures instead of rounded for users with certain titles."
+		},
+        "DiscourseUseNoFollowOnForumLinks": {
+			"value": false,
+			"description": "Add nofollow to all links to the forum. Not recommended for SEO."
+		},
+        "DiscourseOpenForumLinksInNewTab": {
+			"value": true,
+			"description": "Open all links to the forum in a new tab using `_blank`, otherwise uses the default behavior of the browser."
+		}
+	}
+}

@@ -1,0 +1,28 @@
+.discourse-related-posts {
+	max-width: var(--width-page); 
+	margin: 40px auto;
+	padding-top: 20px;
+	border-top: 1px solid var(--border-color-subtle, #eaecf0);
+}
+
+.discourse-card {
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.discourse-card:hover {
+	transform: translateY(-2px);
+}
+
+.discourse-card-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+	gap: 16px;
+	padding: 0;
+	list-style: none;
+}
+
+.discourse-card-meta {
+	font-size: 0.85em;
+	color: var(--color-subtler, #72777d);
+	margin-top: 4px;
+}
