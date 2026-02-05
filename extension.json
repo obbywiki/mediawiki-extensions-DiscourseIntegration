@@ -4,7 +4,7 @@
     "name": "DiscourseIntegration",
     "description": "Integrates Discourse with MediaWiki",
     "author": ["[https://obbywiki.com ObbyWiki]", "WOU", "Wolfite"],
-    "version": "0.0.1",
+    "version": "0.1.0",
     "license-name": "MIT",
     "url": "https://github.com/obbywiki/mediawiki-extensions-DiscourseIntegration",
 
