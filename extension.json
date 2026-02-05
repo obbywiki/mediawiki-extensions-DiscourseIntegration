@@ -3,7 +3,7 @@
     "config_prefix": "wg",
     "name": "DiscourseIntegration",
     "description": "Integrates Discourse with MediaWiki",
-    "author": ["ObbyWiki", "WOU", "Wolfite"],
+    "author": ["[https://obbywiki.com ObbyWiki]", "WOU", "Wolfite"],
     "version": "0.0.1",
     "license-name": "MIT",
     "url": "https://github.com/obbywiki/mediawiki-extensions-DiscourseIntegration",
