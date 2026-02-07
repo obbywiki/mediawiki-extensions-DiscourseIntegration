@@ -85,7 +85,7 @@ class RelatedPosts {
                 $blurb = substr( $blurb, 0, 100 ) . '...';
             }
 
-            $pfpBorderRadius = ($this->config->getSquarePFPForAll() || in_array($post['user_title'], $this->config->getSquarePFPForUsersWithTitles())) ? '10%' : '50%';
+            $pfpBorderRadius = ($this->config->getSquarePFPForAll() || in_array(($post['user_title'] ?: ''), $this->config->getSquarePFPForUsersWithTitles())) ? '10%' : '50%';
             $rel = $this->config->getUseNoFollowOnForumLinks() ? 'nofollow' : '';
             $target = $this->config->getOpenForumLinksInNewTab() ? 'target="_blank"' : '';
 
@@ -188,7 +188,7 @@ HTML;
 		$heading = wfMessage( 'discourseintegration-related-posts' )->escaped();
 
 		return <<<HTML
-<aside class="noprint" style="max-width: var(--width-page, 100%); margin: 2em auto; padding-inline: var(--padding-page);">
+<aside class="noprint" style="max-width: var(--width-page, 100%); margin: 2em auto;">
 	<h2 class="read-more-container-heading" style="margin-bottom: 16px;">$heading</h2>
 	<ul style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; list-style: none; margin: 0; padding: 0;">
 		$listItems
@@ -289,7 +289,8 @@ HTML;
                             $results[] = [
                                 'topic' => $topic, 
                                 'post' => $candidate,
-                                'tags' => $topic['tags'] ?? []
+                                'tags' => $topic['tags'] ?? [],
+                                'fallback' => true
                             ];
                         }
                     }
