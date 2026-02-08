@@ -188,7 +188,7 @@ HTML;
 		$heading = wfMessage( 'discourseintegration-related-posts' )->escaped();
 
 		return <<<HTML
-<aside class="noprint" style="max-width: var(--width-page, 100%); margin: 2em auto;">
+<aside class="noprint" style="max-width: var(--width-page, 100%); margin: 2em auto; padding-inline: var(--padding-page);">
 	<h2 class="read-more-container-heading" style="margin-bottom: 16px;">$heading</h2>
 	<ul style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; list-style: none; margin: 0; padding: 0;">
 		$listItems
