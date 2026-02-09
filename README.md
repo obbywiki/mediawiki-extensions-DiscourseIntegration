@@ -26,17 +26,17 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 
 ## Config Reference
 
-* `$wgDiscourseReplaceTalkPages` **REQUIRED** - default TRUE - Whether to replace Talk Page links with links to Discourse search (e.g., https://discourse.example.com/search?q=Page+Title)
-* `$wgDiscourseBaseURL` **REQUIRED** - default "https://discourse.example.com" - Base URL of the Discourse instance. Do not include trailing slash.
-* `$wgDiscourseAPIKey` **REQUIRED** - default "" - API key for the Discourse instance. Must be global with read/write permissions.
-* `$wgDiscourseAPIUsername` **REQUIRED** - default "system" - Username used to process all API requests.
-* `$wgDiscourseTargetNamespaces` **BEST PRACTICE** - default [0] - Namespaces to replace talk page buttons with Discourse threads and show related posts.
-* `$wgDiscourseTargetSkins` **BEST PRACTICE** - default ["citizen","vector","vector-2022"] - Skins (in lowercase) to replace talk page buttons with Discourse threads and show related posts.
-* `$wgDiscourseExcludeStrings` - default [] - List of strings. If a page title contains any of these, the talk page link will NOT be replaced.
-* `$wgDiscourseSquarePFPsForAll` - default FALSE - Use square profile pictures instead of rounded.
-* `$wgDiscourseSquarePFPsForUsersWithTitles` - default [] - Use square profile pictures instead of rounded for users with certain titles.
-* `$wgDiscourseUseNoFollowOnForumLinks` - default FALSE - Add nofollow to all links to the forum. Not recommended for SEO.
-* `$wgDiscourseOpenForumLinksInNewTab` - default TRUE - Open all links to the forum in a new tab using `_blank`, otherwise uses the default behavior of the browser.
+* `$wgDiscourseReplaceTalkPages` **REQUIRED** - default `TRUE` - Whether to replace Talk Page links with links to Discourse search (e.g., https://discourse.example.com/search?q=Page+Title)
+* `$wgDiscourseBaseURL` **REQUIRED** - default `"https://discourse.example.com"` - Base URL of the Discourse instance. Do not include trailing slash.
+* `$wgDiscourseAPIKey` **REQUIRED** - default `""` - API key for the Discourse instance. Must be global with read/write permissions.
+* `$wgDiscourseAPIUsername` **REQUIRED** - default `"system"` - Username used to process all API requests.
+* `$wgDiscourseTargetNamespaces` **BEST PRACTICE** - default `[0]` - Namespaces to replace talk page buttons with Discourse threads and show related posts.
+* `$wgDiscourseTargetSkins` **BEST PRACTICE** - default `["citizen","vector","vector-2022"]` - Skins (in lowercase) to replace talk page buttons with Discourse threads and show related posts.
+* `$wgDiscourseExcludeStrings` - default `[]` - List of strings. If a page title contains any of these, the talk page link will NOT be replaced.
+* `$wgDiscourseSquarePFPsForAll` - default `FALSE` - Use square profile pictures instead of rounded.
+* `$wgDiscourseSquarePFPsForUsersWithTitles` - default `[]` - Use square profile pictures instead of rounded for users with certain titles.
+* `$wgDiscourseUseNoFollowOnForumLinks` - default `FALSE` - Add nofollow to all links to the forum. Not recommended for SEO.
+* `$wgDiscourseOpenForumLinksInNewTab` - default `TRUE` - Open all links to the forum in a new tab using `_blank`, otherwise uses the default behavior of the browser.
 
 ## TODO
 * Fix secondary topic requests not working on some versions/instances/configs
