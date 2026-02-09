@@ -86,6 +86,10 @@
             "value": [],
             "description": "List of strings. If a page title contains any of these, the talk page link will NOT be replaced."
         },
+        "DiscourseExcludePages": {
+            "value": ["Main_Page", "Home", "Main", "Mainpage"],
+            "description": "List of page titles. If a page title matches any of these, the talk page link will NOT be replaced and related posts will not be shown."
+        },
         "DiscourseSquarePFPsForAll": {
 			"value": false,
 			"description": "Use square profile pictures instead of rounded."

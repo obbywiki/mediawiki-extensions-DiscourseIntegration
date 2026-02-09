@@ -14,6 +14,7 @@ class ExtensionConfig {
 	public const TARGET_NAMESPACES = 'DiscourseTargetNamespaces';
     public const TARGET_SKINS = 'DiscourseTargetSkins';
 	public const EXCLUDE_STRINGS = 'DiscourseExcludeStrings';
+    public const EXCLUDE_PAGES = 'DiscourseExcludePages';
 	public const SQUARE_PFP_FOR_ALL = 'DiscourseSquarePFPsForAll';
 	public const SQUARE_PFP_FOR_USERS_WITH_TITLES = 'DiscourseSquarePFPsForUsersWithTitles';
     public const USE_NO_FOLLOW_ON_FORUM_LINKS = 'DiscourseUseNoFollowOnForumLinks';
@@ -72,6 +73,10 @@ class ExtensionConfig {
 
 	public function getExcludeStrings(): array {
 		return $this->options->get( self::EXCLUDE_STRINGS ) ?: [];
+	}
+
+	public function getExcludePages(): array {
+		return $this->options->get( self::EXCLUDE_PAGES ) ?: ["Main_Page", "Home", "Main", "Mainpage"];
 	}
 
     public function getSquarePFPForAll(): bool {

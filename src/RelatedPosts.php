@@ -35,11 +35,18 @@ class RelatedPosts {
 			return;
 		}
 
-        if ( !$skin->getTitle()->exists() ) {
+        $title = $skin->getTitle();
+
+        if ( !$title->exists() ) {
             return;
         }
 
-		$term = $skin->getTitle()->getText();
+        $excludePages = $this->config->getExcludePages();
+		if ( in_array( $title->getPrefixedText(), $excludePages ) ) {
+			return;
+		}
+
+		$term = $title->getText();
 		$posts = $this->getRelatedPosts( $term );
 
 		if ( empty( $posts ) ) {

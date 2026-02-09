@@ -28,6 +28,10 @@ class Hooks  {
 			return;
 		}
 
+		$excludePages = $this->config->getExcludePages();
+		if ( in_array( $title->getPrefixedText(), $excludePages ) ) {
+			return;
+		}
 
 		$excludeStrings = $this->config->getExcludeStrings();
 		$titleText = $title->getPrefixedText();
