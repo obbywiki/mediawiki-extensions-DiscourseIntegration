@@ -39,9 +39,8 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 * `$wgDiscourseOpenForumLinksInNewTab` - default TRUE - Open all links to the forum in a new tab using `_blank`, otherwise uses the default behavior of the browser.
 
 ## TODO
-* Add support for other languages
 * Fix secondary topic requests not working on some versions/instances/configs
-* Improve loading times
+* Improve loading times (probably should cache and load from client request and only show section when scrolling down there)
 * Improve styling for post cards on larger screens
 * Better topic sorting controls
 * Potentially delay paint until user scrols to the bottom like RelatedArticles (?)
