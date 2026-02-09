@@ -8,7 +8,7 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 
 ## Requirements
 
-* MediaWiki 1.43.0+ (1.46 tested)
+* MediaWiki 1.43.0+ (1.46 verified)
 * Discourse Latest
 
 ## Suggestions
