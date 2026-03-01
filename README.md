@@ -33,14 +33,26 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 * `$wgDiscourseTargetNamespaces` **BEST PRACTICE** - default `[0]` - Namespaces to replace talk page buttons with Discourse threads and show related posts.
 * `$wgDiscourseTargetSkins` **BEST PRACTICE** - default `["citizen","vector","vector-2022"]` - Skins (in lowercase) to replace talk page buttons with Discourse threads and show related posts.
 * `$wgDiscourseExcludeStrings` - default `[]` - List of strings. If a page title contains any of these, the talk page link will NOT be replaced.
+* `$wgDiscourseExcludePages` - default `["Main_Page", "Home", "Main", "Mainpage"]` - List of page titles. If a page title matches any of these, the talk page link will NOT be replaced and related posts will not be shown.
 * `$wgDiscourseSquarePFPsForAll` - default `FALSE` - Use square profile pictures instead of rounded.
 * `$wgDiscourseSquarePFPsForUsersWithTitles` - default `[]` - Use square profile pictures instead of rounded for users with certain titles.
 * `$wgDiscourseUseNoFollowOnForumLinks` - default `FALSE` - Add nofollow to all links to the forum. Not recommended for SEO.
 * `$wgDiscourseOpenForumLinksInNewTab` - default `TRUE` - Open all links to the forum in a new tab using `_blank`, otherwise uses the default behavior of the browser.
+* `$wgDiscourseCacheTTL` - default `3600` - How long (in seconds) to cache Discourse API responses. Failed API calls are cached for 5 minutes to avoid hammering Discourse.
+
+## Changelog
+
+### 0.2.0
+
+* **Caching improvements**: Configurable cache TTL via `$wgDiscourseCacheTTL`, negative caching (failed API responses are cached for 5 minutes), and HTTP request timeouts
+* **Bug fix**: `DiscourseExcludePages` was missing from `CONSTRUCTOR_OPTIONS` and could cause assertion failures
+* **Proper hook handler DI**: `RelatedPosts` is now registered as a `HookHandler` via `extension.json` with dependency injection instead of using a static bridge method
+* **CSS refinement**: All inline styles moved to `resources/styles.css` — styles are now skin-overridable and browser-cacheable
+* **Styles module loading**: The `ext.DiscourseIntegration.styles` module is now actually loaded (was previously defined but never added to the page output)
+* **Error logging**: API failures are now logged via MediaWiki's logging framework (`DiscourseIntegration` channel)
 
 ## TODO
-* Fix secondary topic requests not working on some versions/instances/configs
-* Improve loading times (probably should cache and load from client request and only show section when scrolling down there)
-* Improve styling for post cards on larger screens
+
 * Better topic sorting controls
-* Potentially delay paint until user scrols to the bottom like RelatedArticles (?)
+* Potentially delay paint until user scrolls to the bottom like RelatedArticles
+* user_title might not be defined in the API response

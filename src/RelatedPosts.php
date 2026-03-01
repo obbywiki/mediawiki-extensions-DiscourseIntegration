@@ -2,29 +2,35 @@
 
 namespace MediaWiki\Extension\DiscourseIntegration;
 
-use MediaWiki\Cache\LinkBatchFactory;
-use MediaWiki\Config\ServiceOptions;
 use MediaWiki\Http\HttpRequestFactory;
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Logger\LoggerFactory;
 use Psr\Log\LoggerInterface;
 use WANObjectCache;
 
 class RelatedPosts {
 	public const SERVICE_NAME = 'DiscourseIntegrationRelatedPosts';
 
+	/** Cache version — bump when output format changes. */
+	private const CACHE_VERSION = 1;
+
+	/** How long to cache an empty/error result so we don't hammer Discourse. */
+	private const NEGATIVE_CACHE_TTL = 300; // 5 minutes
+
+	private readonly LoggerInterface $logger;
+
 	public function __construct(
 		private readonly ExtensionConfig $config,
 		private readonly HttpRequestFactory $httpRequestFactory,
 		private readonly WANObjectCache $cache,
-		private readonly LoggerInterface $logger
 	) {
-	}
-    
-	public static function onSkinAfterContentStatic( &$data, $skin ) {
-		MediaWikiServices::getInstance()->getService( self::SERVICE_NAME )
-			->onSkinAfterContent( $data, $skin );
+		$this->logger = LoggerFactory::getInstance( 'DiscourseIntegration' );
 	}
 
+	/**
+	 * Hook handler — registered via HookHandlers in extension.json.
+	 * @param string &$data
+	 * @param \Skin $skin
+	 */
 	public function onSkinAfterContent( &$data, $skin ) {
 		$targetNamespaces = $this->config->getTargetNamespaces();
 		if ( !in_array( $skin->getTitle()->getNamespace(), $targetNamespaces ) ) {
@@ -53,6 +59,7 @@ class RelatedPosts {
 			return;
 		}
 
+		$skin->getOutput()->addModuleStyles( [ 'ext.DiscourseIntegration.styles' ] );
 		$html = $this->render( $posts );
 		$data .= $html;
 	}
@@ -195,7 +202,7 @@ HTML;
 		$heading = wfMessage( 'discourseintegration-related-posts' )->escaped();
 
 		return <<<HTML
-<aside class="noprint" style="max-width: var(--width-page, 100%); margin: 2em auto; padding-inline: var(--padding-page);">
+<aside class="noprint" style="max-width: var(--width-page, 100%); margin: 2em auto; margin-top: 0px;">
 	<h2 class="read-more-container-heading" style="margin-bottom: 16px;">$heading</h2>
 	<ul style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; list-style: none; margin: 0; padding: 0;">
 		$listItems
@@ -204,20 +211,30 @@ HTML;
 HTML;
 	}
 
+	/**
+	 * Fetch related posts from Discourse with caching.
+	 *
+	 * Uses WANObjectCache with configurable TTL. On API failure, caches
+	 * empty results for 5 minutes (negative caching) to avoid hammering
+	 * the Discourse instance.
+	 */
 	private function getRelatedPosts( string $term ): array {
-		$key = $this->cache->makeKey( 'discourse-related-posts', md5( $term ), 'v16' );
+		$ttl = $this->config->getCacheTTL();
+		$key = $this->cache->makeKey( 'discourse-related-posts', md5( $term ), 'v' . self::CACHE_VERSION );
 
 		return $this->cache->getWithSetCallback(
 			$key,
-			WANObjectCache::TTL_HOUR,
-			function () use ( $term ) {
+			$ttl,
+			function ( $oldValue, &$ttl, array &$setOpts ) use ( $term ) {
 				$baseUrl = rtrim( $this->config->getBaseUrl(), '/' );
 				$apiKey = $this->config->getApiKey();
 				$apiUser = $this->config->getApiUsername();
 
+				// --- Step 1: Search Discourse ---
 				$searchUrl = "$baseUrl/search.json?q=" . urlencode( $term );
 				$req = $this->httpRequestFactory->create( $searchUrl, [
 					'method' => 'GET',
+					'timeout' => 10,
 					'headers' => [
 						'Api-Key' => $apiKey,
 						'Api-Username' => $apiUser,
@@ -226,10 +243,24 @@ HTML;
 
 				$status = $req->execute();
 				if ( !$status->isOK() ) {
+					$this->logger->warning(
+						'Discourse search API request failed for term "{term}": {error}',
+						[ 'term' => $term, 'error' => $status->getMessage()->text() ]
+					);
+					$ttl = self::NEGATIVE_CACHE_TTL;
 					return [];
 				}
 
 				$data = json_decode( $req->getContent(), true );
+				if ( !is_array( $data ) ) {
+					$this->logger->warning(
+						'Discourse search API returned invalid JSON for term "{term}"',
+						[ 'term' => $term ]
+					);
+					$ttl = self::NEGATIVE_CACHE_TTL;
+					return [];
+				}
+
 				$posts = $data['posts'] ?? [];
                 $topics = $data['topics'] ?? [];
                 $topicsMap = array_column( $topics, null, 'id' );
@@ -246,6 +277,11 @@ HTML;
                     }
                 }
 
+				if ( empty( $candidates ) ) {
+					$ttl = self::NEGATIVE_CACHE_TTL;
+					return [];
+				}
+
                 // get full topic/post info from the API for every selected topic
                 $results = [];
                 foreach ( $candidates as $candidate ) {
@@ -257,6 +293,7 @@ HTML;
 
                     $topicReq = $this->httpRequestFactory->create( $topicUrl, [
                         'method' => 'GET',
+						'timeout' => 10,
                         'headers' => [
                             'Api-Key' => $apiKey,
                             'Api-Username' => $apiUser,
@@ -287,7 +324,12 @@ HTML;
                             ];
                             $success = true;
                         }
-                    } 
+                    } else {
+						$this->logger->info(
+							'Discourse topic API request failed for topic {id}: {error}',
+							[ 'id' => $id, 'error' => $topicStatus->getMessage()->text() ]
+						);
+					}
                     
                     if ( !$success ) {
                         // fallback to searching data
@@ -308,4 +350,3 @@ HTML;
 		);
 	}
 }
-

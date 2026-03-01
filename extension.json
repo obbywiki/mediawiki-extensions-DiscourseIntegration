@@ -4,7 +4,7 @@
     "name": "DiscourseIntegration",
     "description": "Integrates Discourse with MediaWiki",
     "author": ["[https://obbywiki.com ObbyWiki]", "WOU", "Wolfite"],
-    "version": "0.1.0",
+    "version": "0.2.0",
     "license-name": "MIT",
     "url": "https://github.com/obbywiki/mediawiki-extensions-DiscourseIntegration",
 
@@ -42,12 +42,20 @@
             "services": [
                 "DiscourseIntegrationConfig"
             ]
+        },
+        "DiscourseIntegrationRelatedPosts": {
+            "class": "MediaWiki\\Extension\\DiscourseIntegration\\RelatedPosts",
+            "services": [
+                "DiscourseIntegrationConfig",
+                "HttpRequestFactory",
+                "MainWANObjectCache"
+            ]
         }
     },
 
     "Hooks": {
         "SkinTemplateNavigation::Universal": "DiscourseIntegrationHooks",
-        "SkinAfterContent": "MediaWiki\\Extension\\DiscourseIntegration\\RelatedPosts::onSkinAfterContentStatic"
+        "SkinAfterContent": "DiscourseIntegrationRelatedPosts"
     },
 
     "ResourceModules": {
@@ -105,6 +113,10 @@
         "DiscourseOpenForumLinksInNewTab": {
 			"value": true,
 			"description": "Open all links to the forum in a new tab using `_blank`, otherwise uses the default behavior of the browser."
+		},
+		"DiscourseCacheTTL": {
+			"value": 3600,
+			"description": "How long (in seconds) to cache Discourse API responses. Set to 0 to disable caching. Default: 3600 (1 hour)."
 		}
 	}
 }

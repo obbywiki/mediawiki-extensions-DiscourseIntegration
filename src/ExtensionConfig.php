@@ -19,18 +19,21 @@ class ExtensionConfig {
 	public const SQUARE_PFP_FOR_USERS_WITH_TITLES = 'DiscourseSquarePFPsForUsersWithTitles';
     public const USE_NO_FOLLOW_ON_FORUM_LINKS = 'DiscourseUseNoFollowOnForumLinks';
     public const OPEN_FORUM_LINKS_IN_NEW_TAB = 'DiscourseOpenForumLinksInNewTab';
+	public const CACHE_TTL = 'DiscourseCacheTTL';
 	public const CONSTRUCTOR_OPTIONS = [
 		self::API_KEY,
 		self::API_USERNAME,
 		self::BASE_URL,
 		self::REPLACE_TALK_PAGES,
 		self::TARGET_NAMESPACES,
-        self::TARGET_SKINS,
+		self::TARGET_SKINS,
 		self::EXCLUDE_STRINGS,
+		self::EXCLUDE_PAGES,
 		self::SQUARE_PFP_FOR_ALL,
 		self::SQUARE_PFP_FOR_USERS_WITH_TITLES,
-        self::USE_NO_FOLLOW_ON_FORUM_LINKS,
-        self::OPEN_FORUM_LINKS_IN_NEW_TAB,
+		self::USE_NO_FOLLOW_ON_FORUM_LINKS,
+		self::OPEN_FORUM_LINKS_IN_NEW_TAB,
+		self::CACHE_TTL,
 	];
 
 	public function __construct(
@@ -94,4 +97,8 @@ class ExtensionConfig {
     public function getOpenForumLinksInNewTab(): bool {
         return $this->options->get( self::OPEN_FORUM_LINKS_IN_NEW_TAB ) ?: false;
     }
+
+	public function getCacheTTL(): int {
+		return (int)( $this->options->get( self::CACHE_TTL ) ?: 3600 );
+	}
 }
