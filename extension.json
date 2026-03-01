@@ -117,6 +117,10 @@
 		"DiscourseCacheTTL": {
 			"value": 3600,
 			"description": "How long (in seconds) to cache Discourse API responses. Set to 0 to disable caching. Default: 3600 (1 hour)."
+		},
+		"DiscourseTopicSortOrder": {
+			"value": "",
+			"description": "Sort order for related topics. Empty for relevance, or 'latest', 'likes', 'views'."
 		}
 	}
 }

@@ -99,7 +99,7 @@ class RelatedPosts {
                 $blurb = substr( $blurb, 0, 100 ) . '...';
             }
 
-            $pfpBorderRadius = ($this->config->getSquarePFPForAll() || in_array(($post['user_title'] ?: ''), $this->config->getSquarePFPForUsersWithTitles())) ? '10%' : '50%';
+            $pfpBorderRadius = ($this->config->getSquarePFPForAll() || in_array(($post['user_title'] ?? ''), $this->config->getSquarePFPForUsersWithTitles())) ? '10%' : '50%';
             $rel = $this->config->getUseNoFollowOnForumLinks() ? 'nofollow' : '';
             $target = $this->config->getOpenForumLinksInNewTab() ? 'target="_blank"' : '';
 
@@ -231,7 +231,12 @@ HTML;
 				$apiUser = $this->config->getApiUsername();
 
 				// --- Step 1: Search Discourse ---
-				$searchUrl = "$baseUrl/search.json?q=" . urlencode( $term );
+				$searchQuery = $term;
+				$sortOrder = $this->config->getTopicSortOrder();
+				if ( $sortOrder !== '' ) {
+					$searchQuery .= ' order:' . $sortOrder;
+				}
+				$searchUrl = "$baseUrl/search.json?q=" . urlencode( $searchQuery );
 				$req = $this->httpRequestFactory->create( $searchUrl, [
 					'method' => 'GET',
 					'timeout' => 10,

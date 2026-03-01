@@ -20,6 +20,7 @@ class ExtensionConfig {
     public const USE_NO_FOLLOW_ON_FORUM_LINKS = 'DiscourseUseNoFollowOnForumLinks';
     public const OPEN_FORUM_LINKS_IN_NEW_TAB = 'DiscourseOpenForumLinksInNewTab';
 	public const CACHE_TTL = 'DiscourseCacheTTL';
+	public const TOPIC_SORT_ORDER = 'DiscourseTopicSortOrder';
 	public const CONSTRUCTOR_OPTIONS = [
 		self::API_KEY,
 		self::API_USERNAME,
@@ -34,6 +35,7 @@ class ExtensionConfig {
 		self::USE_NO_FOLLOW_ON_FORUM_LINKS,
 		self::OPEN_FORUM_LINKS_IN_NEW_TAB,
 		self::CACHE_TTL,
+		self::TOPIC_SORT_ORDER,
 	];
 
 	public function __construct(
@@ -100,5 +102,9 @@ class ExtensionConfig {
 
 	public function getCacheTTL(): int {
 		return (int)( $this->options->get( self::CACHE_TTL ) ?: 3600 );
+	}
+
+	public function getTopicSortOrder(): string {
+		return $this->options->get( self::TOPIC_SORT_ORDER ) ?: '';
 	}
 }

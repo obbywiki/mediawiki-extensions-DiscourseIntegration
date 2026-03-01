@@ -39,6 +39,7 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 * `$wgDiscourseUseNoFollowOnForumLinks` - default `FALSE` - Add nofollow to all links to the forum. Not recommended for SEO.
 * `$wgDiscourseOpenForumLinksInNewTab` - default `TRUE` - Open all links to the forum in a new tab using `_blank`, otherwise uses the default behavior of the browser.
 * `$wgDiscourseCacheTTL` - default `3600` - How long (in seconds) to cache Discourse API responses. Failed API calls are cached for 5 minutes to avoid hammering Discourse.
+* `$wgDiscourseTopicSortOrder` - default `""` - Sort order for related topics. When empty, searches by relevance. Accepts values like `"latest"`, `"likes"`, `"views"`.
 
 ## Changelog
 
@@ -53,6 +54,4 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 
 ## TODO
 
-* Better topic sorting controls
 * Potentially delay paint until user scrolls to the bottom like RelatedArticles
-* user_title might not be defined in the API response
