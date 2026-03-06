@@ -55,3 +55,5 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 ## TODO
 
 * Potentially delay paint until user scrolls to the bottom like RelatedArticles
+* If a topic is locked by the system the info post will be used as the highlight, first post in the topic should count
+* Related Discourse posts appears even in the edit action page
