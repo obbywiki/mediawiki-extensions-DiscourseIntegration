@@ -11,7 +11,7 @@ class RelatedPosts {
 	public const SERVICE_NAME = 'DiscourseIntegrationRelatedPosts';
 
 	/** Cache version — bump when output format changes. */
-	private const CACHE_VERSION = 1;
+	private const CACHE_VERSION = 2;
 
 	/** How long to cache an empty/error result so we don't hammer Discourse. */
 	private const NEGATIVE_CACHE_TTL = 300; // 5 minutes
@@ -32,6 +32,11 @@ class RelatedPosts {
 	 * @param \Skin $skin
 	 */
 	public function onSkinAfterContent( &$data, $skin ) {
+		// only show related posts when reading
+		if ( $skin->getRequest()->getVal( 'action', 'view' ) !== 'view' ) {
+			return;
+		}
+
 		$targetNamespaces = $this->config->getTargetNamespaces();
 		if ( !in_array( $skin->getTitle()->getNamespace(), $targetNamespaces ) ) {
 			return;
@@ -94,16 +99,14 @@ class RelatedPosts {
             $dateStr = $post['created_at'] ?? $topic['created_at'] ?? 'now';
             $date = date( 'M j, Y', strtotime( $dateStr ) );
             
-            $blurb = htmlspecialchars( $post['blurb'] ?? '' );
-            if ( strlen( $blurb ) > 100 ) {
-                $blurb = substr( $blurb, 0, 100 ) . '...';
-            }
+            $blurbText = $post['blurb'] ?? '';
+            $blurbHtml = nl2br( htmlspecialchars( $blurbText ) );
 
             $pfpBorderRadius = ($this->config->getSquarePFPForAll() || in_array(($post['user_title'] ?? ''), $this->config->getSquarePFPForUsersWithTitles())) ? '10%' : '50%';
             $rel = $this->config->getUseNoFollowOnForumLinks() ? 'nofollow' : '';
             $target = $this->config->getOpenForumLinksInNewTab() ? 'target="_blank"' : '';
 
-            // Tags
+            // tags
             $tagsHtml = '';
             if ( !empty( $tags ) ) {
                 $tagLinks = [];
@@ -171,29 +174,48 @@ HTML;
 HTML;
             }
 
+            // try to use extracted preview image, else nothing
+            $previewImageUrl = $post['preview_image'] ?? $topic['image_url'] ?? '';
+            $previewImageHtml = '';
+            if ( $previewImageUrl ) {
+                $previewImageUrlSafe = htmlspecialchars( $previewImageUrl );
+                $previewImageHtml = <<<HTML
+<div style="width: 100%; height: 160px; overflow: hidden; background-color: var(--background-color-interactive-subtle, #eee); border-bottom: 1px solid var(--border-color-subtle, #eaecf0); flex-shrink: 0;">
+    <img src="$previewImageUrlSafe" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
+</div>
+HTML;
+            }
+
             // meta
             $meta = [];
             if ( $name ) { $meta[] = htmlspecialchars( $name ) . ' <span style="opacity: 0.6;">@' . htmlspecialchars( $username ) . '</span>'; }
             else if ( $username ) { $meta[] = '@' . htmlspecialchars( $username ); };
             $meta[] = $date;
-            $metaStr = implode( '<br />', $meta );
+            $metaStr = implode( ' &bull; ', $meta );
 
 			$listItems .= <<<HTML
 <li title="$title" style="position: relative; list-style: none;">
     <a href="$url" rel="$rel noopener noreferrer" $target style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;" aria-label="$title"></a>
-	<div class="cdx-card" style="height: 100%; display: flex; padding: 12px; box-sizing: border-box; border-radius: var(--border-radius-medium, 4px);">
-        <div style="border-radius: $pfpBorderRadius; overflow: hidden; height: 56px; width: 56px; min-width: 56px; margin-right: 16px; align-self: start; flex-shrink: 0; background-color: var(--background-color-interactive-subtle, #eee);">
-            $thumbnailHtml
+	<div class="cdx-card discourse-card" style="height: 100%; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; border-radius: var(--border-radius-medium, 4px); background-color: var(--background-color-base, #fff); border: 1px solid var(--border-color-subtle, #eaecf0);">
+        $previewImageHtml
+        <div style="display: flex; padding: 12px; flex: 1;">
+            <div style="border-radius: $pfpBorderRadius; overflow: hidden; height: 40px; width: 40px; min-width: 40px; margin-right: 12px; align-self: start; flex-shrink: 0; background-color: var(--background-color-interactive-subtle, #eee);">
+                $thumbnailHtml
+            </div>
+            <div class="cdx-card__text" style="display: flex; flex-direction: column; width: 100%;">
+                <span class="cdx-card__text__title" style="text-decoration: none; color: inherit; font-weight: 600; line-height: 1.3; font-size: 1rem; display: block; margin-bottom: 4px;">
+                    <span class="cdx-card__text__title__content">$title</span>
+                </span>
+                <div style="font-size: 0.75rem; color: var(--color-subtle, #72777d); margin-bottom: 6px;">$metaStr</div>
+                <div style="font-size: 0.875rem; color: var(--color-base, #202122); line-height: 1.4; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;">
+                    $blurbHtml
+                </div>
+                $tagsHtml
+                <div style="margin-top: auto; padding-top: 8px;">
+                    $statsHtml
+                </div>
+            </div>
         </div>
-		<div class="cdx-card__text" style="display: flex; flex-direction: column; width: 100%;">
-			<span class="cdx-card__text__title" style="text-decoration: none; color: inherit; font-weight: 600; line-height: 1.3; font-size: 1rem; display: block; margin-bottom: 4px;">
-                <span class="cdx-card__text__title__content">$title</span>
-            </span>
-            <div style="font-size: 0.75rem; color: var(--color-subtle, #72777d); margin-bottom: 6px;">$metaStr</div>
-            <div style="font-size: 0.875rem; color: var(--color-base, #202122); line-height: 1.4; margin-bottom: 8px;">"$blurb"</div>
-            $tagsHtml
-            $statsHtml
-		</div>
 	</div>
 </li>
 HTML;
@@ -202,7 +224,7 @@ HTML;
 		$heading = wfMessage( 'discourseintegration-related-posts' )->escaped();
 
 		return <<<HTML
-<aside class="noprint" style="max-width: var(--width-page, 100%); margin: 2em auto; margin-top: 0px;">
+<aside class="discourse-related-posts noprint" style="max-width: var(--width-page, 100%); margin: 2em auto; margin-top: 0px;">
 	<h2 class="read-more-container-heading" style="margin-bottom: 16px;">$heading</h2>
 	<ul style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; list-style: none; margin: 0; padding: 0;">
 		$listItems
@@ -309,17 +331,53 @@ HTML;
                     if ( $topicStatus->isOK() ) {
                         $topicData = json_decode( $topicReq->getContent(), true );
                         
-                        if ( is_array( $topicData ) && isset( $topicData['post_stream']['posts'][0] ) ) {
-                            // post_stream.posts[0] is the OP
-                            $firstPost = $topicData['post_stream']['posts'][0];
+                        if ( is_array( $topicData ) && !empty( $topicData['post_stream']['posts'] ) ) {
+                            // find the actual first user post (post_number 1), not a system info post (e.g. on locked topics).
+                            $firstPost = null;
+                            foreach ( $topicData['post_stream']['posts'] as $streamPost ) {
+                                if ( ( $streamPost['post_number'] ?? 0 ) === 1 ) {
+                                    $firstPost = $streamPost;
+                                    break;
+                                }
+                            }
+                            // fall back to the first post in the stream if post_number 1 wasn't found
+                            if ( $firstPost === null ) {
+                                $firstPost = $topicData['post_stream']['posts'][0];
+                            }
 
                             $cooked = $firstPost['cooked'] ?? '';
-                            $blurb = trim( html_entity_decode( strip_tags( $cooked ) ) );
-                            $blurb = preg_replace( '/\s+/', ' ', $blurb );
+                            // better formatting for blurb
+                            $formatted = preg_replace( '/<(p|br|div|blockquote)[^>]*>/i', "\n", $cooked );
+                            $blurb = trim( html_entity_decode( strip_tags( $formatted ) ) );
+                            $blurb = preg_replace( '/[ \t]+/', ' ', $blurb );
+                            $blurb = preg_replace( '/\n\s*\n+/', "\n\n", $blurb );
+                            if ( mb_strlen( $blurb ) > 500 ) {
+                                $blurb = mb_substr( $blurb, 0, 500 ) . '...';
+                            }
                             $firstPost['blurb'] = $blurb;
                             
-                            // tags
+                            // extract image
                             $searchTopicData = $topicsMap[$id] ?? [];
+                            $postImageUrl = $topicData['image_url'] ?? $searchTopicData['image_url'] ?? null;
+                            if ( !$postImageUrl && !empty( $cooked ) ) {
+                                // find all images and pick the first one
+                                if ( preg_match_all( '/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i', $cooked, $matches, PREG_SET_ORDER ) ) {
+                                    foreach ( $matches as $match ) {
+                                        $fullImg = $match[0];
+                                        $src = $match[1];
+                                        if ( !preg_match( '/class=["\'][^"\']*emoji/i', $fullImg ) && !str_contains( $src, '/images/emoji/' ) ) {
+                                            if ( !str_starts_with( $src, 'http' ) && !str_starts_with( $src, 'data:' ) ) {
+                                                $src = $baseUrl . (str_starts_with($src, '/') ? '' : '/') . $src;
+                                            }
+                                            $postImageUrl = $src;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            $firstPost['preview_image'] = $postImageUrl;
+                            
+                            // tags
                             $tags = $searchTopicData['tags'] ?? [];
                             
                             $results[] = [

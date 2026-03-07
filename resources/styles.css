@@ -5,6 +5,11 @@
 	border-top: 1px solid var(--border-color-subtle, #eaecf0);
 }
 
+html.ve-active .discourse-related-posts,
+html.ve-activating .discourse-related-posts {
+	display: none !important;
+}
+
 .discourse-card {
 	transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
