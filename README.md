@@ -55,3 +55,4 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 ## TODO
 
 * Potentially delay paint until user scrolls to the bottom like RelatedArticles
+* Ignore @system posts/topics altogether (maybe a config option)
