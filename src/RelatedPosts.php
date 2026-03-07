@@ -11,7 +11,7 @@ class RelatedPosts {
 	public const SERVICE_NAME = 'DiscourseIntegrationRelatedPosts';
 
 	/** Cache version — bump when output format changes. */
-	private const CACHE_VERSION = 3;
+	private const CACHE_VERSION = 4;
 
 	/** How long to cache an empty/error result so we don't hammer Discourse. */
 	private const NEGATIVE_CACHE_TTL = 300; // 5 minutes
@@ -224,7 +224,7 @@ HTML;
 		$heading = wfMessage( 'discourseintegration-related-posts' )->escaped();
 
 		return <<<HTML
-<aside class="discourse-related-posts noprint" style="max-width: var(--width-page, 100%); margin: 2em auto; margin-top: 0px;">
+<aside class="discourse-related-posts noprint" style="max-width: var(--width-page, 100%); margin: 2em auto; margin-top: 0px; padding-inline: var(--padding-page, 1em);">
 	<h2 class="read-more-container-heading" style="margin-bottom: 16px;">$heading</h2>
 	<ul style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; list-style: none; margin: 0; padding: 0;">
 		$listItems
@@ -292,13 +292,14 @@ HTML;
                 $topics = $data['topics'] ?? [];
                 $topicsMap = array_column( $topics, null, 'id' );
                 
-                // take top 3 unique topics, skipping system/small-action posts
-                // post_type: 1 = regular, 2 = moderator action, 3 = small action, 4 = whisper
+                // take top 3 unique topics, skipping system reply posts
+                // post_number 1 = OP, post_number > 1 = reply
                 $seenTopics = [];
                 $candidates = [];
                 foreach ( $posts as $p ) {
-                    $postType = $p['post_type'] ?? 1;
-                    if ( $postType !== 1 ) {
+                    $pUsername = $p['username'] ?? '';
+                    $pNumber = $p['post_number'] ?? 1;
+                    if ( $pUsername === 'system' && $pNumber > 1 ) {
                         continue;
                     }
                     $tid = $p['topic_id'];
@@ -431,7 +432,12 @@ HTML;
 					}
                     
                     if ( !$success ) {
-                        // fallback to searching data
+                        // fallback to search data, but skip system action posts
+                        $cUsername = $candidate['username'] ?? '';
+                        $cNumber = $candidate['post_number'] ?? 1;
+                        if ( $cUsername === 'system' && $cNumber > 1 ) {
+                            continue;
+                        }
                         $topic = $topicsMap[$id] ?? null;
                         if ( $topic ) {
                             $results[] = [
