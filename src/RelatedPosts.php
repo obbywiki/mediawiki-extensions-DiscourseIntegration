@@ -11,7 +11,7 @@ class RelatedPosts {
 	public const SERVICE_NAME = 'DiscourseIntegrationRelatedPosts';
 
 	/** Cache version — bump when output format changes. */
-	private const CACHE_VERSION = 2;
+	private const CACHE_VERSION = 3;
 
 	/** How long to cache an empty/error result so we don't hammer Discourse. */
 	private const NEGATIVE_CACHE_TTL = 300; // 5 minutes
@@ -292,15 +292,33 @@ HTML;
                 $topics = $data['topics'] ?? [];
                 $topicsMap = array_column( $topics, null, 'id' );
                 
-                // take top 3 unique
+                // take top 3 unique topics, skipping system/small-action posts
+                // post_type: 1 = regular, 2 = moderator action, 3 = small action, 4 = whisper
                 $seenTopics = [];
                 $candidates = [];
                 foreach ( $posts as $p ) {
+                    $postType = $p['post_type'] ?? 1;
+                    if ( $postType !== 1 ) {
+                        continue;
+                    }
                     $tid = $p['topic_id'];
                     if ( !isset( $seenTopics[$tid] ) ) {
                         $seenTopics[$tid] = true;
                         $candidates[] = $p;
                         if ( count( $candidates ) >= 3 ) break;
+                    }
+                }
+
+                // if all results were system posts, retry without the filter
+                if ( empty( $candidates ) ) {
+                    $seenTopics = [];
+                    foreach ( $posts as $p ) {
+                        $tid = $p['topic_id'];
+                        if ( !isset( $seenTopics[$tid] ) ) {
+                            $seenTopics[$tid] = true;
+                            $candidates[] = $p;
+                            if ( count( $candidates ) >= 3 ) break;
+                        }
                     }
                 }
 
@@ -332,17 +350,35 @@ HTML;
                         $topicData = json_decode( $topicReq->getContent(), true );
                         
                         if ( is_array( $topicData ) && !empty( $topicData['post_stream']['posts'] ) ) {
-                            // find the actual first user post (post_number 1), not a system info post (e.g. on locked topics).
+                            // find the actual first user post: post_number 1 AND post_type 1 (regular)
+                            // this avoids system info posts on locked/closed topics
                             $firstPost = null;
+                            $firstRegularPost = null;
                             foreach ( $topicData['post_stream']['posts'] as $streamPost ) {
-                                if ( ( $streamPost['post_number'] ?? 0 ) === 1 ) {
+                                $pNum = $streamPost['post_number'] ?? 0;
+                                $pType = $streamPost['post_type'] ?? 1;
+                                // best match: post #1 that is a regular post
+                                if ( $pNum === 1 && $pType === 1 ) {
                                     $firstPost = $streamPost;
                                     break;
                                 }
+                                // track first regular post as a secondary fallback
+                                if ( $firstRegularPost === null && $pType === 1 ) {
+                                    $firstRegularPost = $streamPost;
+                                }
                             }
-                            // fall back to the first post in the stream if post_number 1 wasn't found
+                            // fallback chain: post_number 1 (any type) → first regular post → first post in stream
                             if ( $firstPost === null ) {
-                                $firstPost = $topicData['post_stream']['posts'][0];
+                                // try post_number 1 even if it's not type 1
+                                foreach ( $topicData['post_stream']['posts'] as $streamPost ) {
+                                    if ( ( $streamPost['post_number'] ?? 0 ) === 1 ) {
+                                        $firstPost = $streamPost;
+                                        break;
+                                    }
+                                }
+                            }
+                            if ( $firstPost === null ) {
+                                $firstPost = $firstRegularPost ?? $topicData['post_stream']['posts'][0];
                             }
 
                             $cooked = $firstPost['cooked'] ?? '';
