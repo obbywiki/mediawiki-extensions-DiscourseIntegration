@@ -383,13 +383,39 @@ HTML;
                             }
 
                             $cooked = $firstPost['cooked'] ?? '';
+                            
+                            // formatting: remove quotes, oneboxes, and attachments
+                            // repeats 3 times to catch nested quotes/asides
+                            for ( $i = 0; $i < 3; $i++ ) {
+                                $cooked = preg_replace( '/<(aside|blockquote)[^>]*>.*?<\/\1>/is', '', $cooked );
+                            }
+                            
+                            // remove oneboxes
+                            $cooked = preg_replace( '/<div[^>]*class=["\'][^"\']*onebox[^"\']*["\'][^>]*>.*?<\/div>/is', '', $cooked );
+                            
+                            // remove mentions and reply links (i think this isnt needed)
+                            $cooked = preg_replace( '/<a[^>]*class=["\'][^"\']*mention[^"\']*["\'][^>]*>.*?<\/a>/is', '', $cooked );
+
                             // better formatting for blurb
-                            $formatted = preg_replace( '/<(p|br|div|blockquote)[^>]*>/i', "\n", $cooked );
+                            $formatted = preg_replace( '/<(p|br|div)[^>]*>/i', "\n", $cooked );
                             $blurb = trim( html_entity_decode( strip_tags( $formatted ) ) );
+                            
+                            // remove raw urls
+                            $blurb = preg_replace( '/(?:https?:\/\/|www\.)\S+/i', '', $blurb );
+                            
+                            // remove Discourse-specific placeholders and broken syntax
+                            $blurb = str_ireplace( '[image]', '', $blurb );
+                            $blurb = str_ireplace( '[media]', '', $blurb );
+                            $blurb = preg_replace( '/\[\/?(?:quote|code|spoiler|md|html).*?\]/is', '', $blurb );
+                            
+                            // remove md links and images syntax
+                            $blurb = preg_replace( '/!?\[([^\]]*)\]\([^)]*\)/', '$1', $blurb );
+
                             $blurb = preg_replace( '/[ \t]+/', ' ', $blurb );
-                            $blurb = preg_replace( '/\n\s*\n+/', "\n\n", $blurb );
-                            if ( mb_strlen( $blurb ) > 500 ) {
-                                $blurb = mb_substr( $blurb, 0, 500 ) . '...';
+                            $blurb = trim( preg_replace( '/\n\s*\n+/', "\n\n", $blurb ) );
+                            
+                            if ( mb_strlen( $blurb ) > 250 ) {
+                                $blurb = mb_substr( $blurb, 0, 250 ) . '...';
                             }
                             $firstPost['blurb'] = $blurb;
                             
