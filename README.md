@@ -58,3 +58,7 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 * Add option to replace talk links in all non-targetted namespaces with a Discourse link
 * Potentially replace talk icon with Discourse logo on some skins (Citizen)
 * More control and separation configurations for extension functionality like replacing talk pages and displaying posts (currently, it can be either all or nothing)
+* Ability to customize cache TTL by category and page size
+* Ability to display more posts, especially depending on screen width
+* Fix follow-up request failures and missing statistics
+* Add reply/post author's avatars
