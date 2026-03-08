@@ -56,3 +56,4 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 
 * Potentially delay paint until user scrolls to the bottom like RelatedArticles
 * Add option to replace talk links in all non-targetted namespaces with a Discourse link
+* Potentially replace talk icon with Discourse logo on some skins (Citizen)
