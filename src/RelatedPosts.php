@@ -384,24 +384,29 @@ HTML;
 
                             $cooked = $firstPost['cooked'] ?? '';
                             
-                            // formatting: remove quotes, oneboxes, and attachments
-                            // repeats 3 times to catch nested quotes/asides
-                            for ( $i = 0; $i < 3; $i++ ) {
-                                $cooked = preg_replace( '/<(aside|blockquote)[^>]*>.*?<\/\1>/is', '', $cooked );
+                            // safely parse HTML to remove quotes and oneboxes properly
+                            $dom = new \DOMDocument();
+                            $html = '<?xml encoding="utf-8" ?>' . $cooked;
+                            @$dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+                            $xpath = new \DOMXPath($dom);
+                            
+                            // remove oneboxes, blockquotes, mentions at the node level
+                            $nodes = $xpath->query('//aside | //blockquote | //div[contains(@class, "onebox")] | //a[contains(@class, "mention")]');
+                            for ($i = $nodes->length - 1; $i >= 0; $i--) {
+                                $node = $nodes->item($i);
+                                $node->parentNode->removeChild($node);
                             }
                             
-                            // remove oneboxes
-                            $cooked = preg_replace( '/<div[^>]*class=["\'][^"\']*onebox[^"\']*["\'][^>]*>.*?<\/div>/is', '', $cooked );
+                            // ensure spacing for block level elements before extracting text
+                            $blocks = $xpath->query('//p | //br | //div | //hr | //li');
+                            foreach ($blocks as $node) {
+                                $node->appendChild($dom->createTextNode("\n"));
+                            }
                             
-                            // remove mentions and reply links (i think this isnt needed)
-                            $cooked = preg_replace( '/<a[^>]*class=["\'][^"\']*mention[^"\']*["\'][^>]*>.*?<\/a>/is', '', $cooked );
-
-                            // better formatting for blurb
-                            $formatted = preg_replace( '/<(p|br|div)[^>]*>/i', "\n", $cooked );
-                            $blurb = trim( html_entity_decode( strip_tags( $formatted ) ) );
+                            $blurb = trim($dom->textContent);
                             
-                            // remove raw urls
-                            $blurb = preg_replace( '/(?:https?:\/\/|www\.)\S+/i', '', $blurb );
+                            // remove raw urls cleanly (does not eat adjacent words)
+                            $blurb = preg_replace( '/(?:https?:\/\/|www\.)[^\s]+/i', '', $blurb );
                             
                             // remove Discourse-specific placeholders and broken syntax
                             $blurb = str_ireplace( '[image]', '', $blurb );
