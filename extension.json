@@ -121,6 +121,14 @@
 		"DiscourseTopicSortOrder": {
 			"value": "",
 			"description": "Sort order for related topics. Empty for relevance, or 'latest', 'likes', 'views'."
+		},
+		"DiscourseMaxRelatedPosts": {
+			"value": 3,
+			"description": "Maximum number of related posts to display."
+		},
+		"DiscourseSiteName": {
+			"value": "Discourse",
+			"description": "Name of the forum to display in the hover overlay."
 		}
 	}
 }

@@ -40,6 +40,8 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 * `$wgDiscourseOpenForumLinksInNewTab` - default `TRUE` - Open all links to the forum in a new tab using `_blank`, otherwise uses the default behavior of the browser.
 * `$wgDiscourseCacheTTL` - default `3600` - How long (in seconds) to cache Discourse API responses. Failed API calls are cached for 5 minutes to avoid hammering Discourse.
 * `$wgDiscourseTopicSortOrder` - default `""` - Sort order for related topics. When empty, searches by relevance. Accepts values like `"latest"`, `"likes"`, `"views"`.
+* `$wgDiscourseMaxRelatedPosts` - default `3` - Maximum number of related posts to display.
+* `$wgDiscourseSiteName` - default `"Discourse"` - Name of the forum to display on hover over related posts.
 
 ## Changelog
 
@@ -59,6 +61,4 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 * Potentially replace talk icon with Discourse logo on some skins (Citizen)
 * More control and separation configurations for extension functionality like replacing talk pages and displaying posts (currently, it can be either all or nothing)
 * Ability to customize cache TTL by category and page size
-* Ability to display more posts, especially depending on screen width
-* Fix follow-up request failures and missing statistics
-* Add reply/post author's avatars
+* Support for solved posts

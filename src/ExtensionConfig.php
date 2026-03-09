@@ -21,6 +21,8 @@ class ExtensionConfig {
     public const OPEN_FORUM_LINKS_IN_NEW_TAB = 'DiscourseOpenForumLinksInNewTab';
 	public const CACHE_TTL = 'DiscourseCacheTTL';
 	public const TOPIC_SORT_ORDER = 'DiscourseTopicSortOrder';
+	public const MAX_RELATED_POSTS = 'DiscourseMaxRelatedPosts';
+	public const SITE_NAME = 'DiscourseSiteName';
 	public const CONSTRUCTOR_OPTIONS = [
 		self::API_KEY,
 		self::API_USERNAME,
@@ -36,6 +38,8 @@ class ExtensionConfig {
 		self::OPEN_FORUM_LINKS_IN_NEW_TAB,
 		self::CACHE_TTL,
 		self::TOPIC_SORT_ORDER,
+		self::MAX_RELATED_POSTS,
+		self::SITE_NAME,
 	];
 
 	public function __construct(
@@ -106,5 +110,13 @@ class ExtensionConfig {
 
 	public function getTopicSortOrder(): string {
 		return $this->options->get( self::TOPIC_SORT_ORDER ) ?: '';
+	}
+
+	public function getMaxRelatedPosts(): int {
+		return (int)( $this->options->get( self::MAX_RELATED_POSTS ) ?: 3 );
+	}
+
+	public function getSiteName(): string {
+		return $this->options->get( self::SITE_NAME ) ?: 'Discourse';
 	}
 }

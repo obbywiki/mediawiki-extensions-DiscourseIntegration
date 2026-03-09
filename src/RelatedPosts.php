@@ -75,6 +75,7 @@ class RelatedPosts {
 		}
 		
 		$baseUrl = rtrim( $this->config->getBaseUrl(), '/' );
+		$siteName = htmlspecialchars( $this->config->getSiteName() );
 
 		$listItems = '';
 		foreach ( $results as $item ) {
@@ -92,9 +93,9 @@ class RelatedPosts {
             $id = $topic['id'] ?? $post['topic_id'];
 			$url = htmlspecialchars( "$baseUrl/t/$slug/$id" );
             
-            $name = $post['name'] ?? $topic['posters'][0]['user']['name'] ?? '';
-            $username = $post['username'] ?? $topic['posters'][0]['user']['username'] ?? '';
-            $avatarTemplate = $post['avatar_template'] ?? ''; 
+            $name = $post['name'] ?? $topic['details']['created_by']['name'] ?? $topic['posters'][0]['user']['name'] ?? '';
+            $username = $post['username'] ?? $topic['details']['created_by']['username'] ?? $topic['posters'][0]['user']['username'] ?? '';
+            $avatarTemplate = $post['avatar_template'] ?? $topic['details']['created_by']['avatar_template'] ?? ''; 
             
             $dateStr = $post['created_at'] ?? $topic['created_at'] ?? 'now';
             $date = date( 'M j, Y', strtotime( $dateStr ) );
@@ -133,7 +134,7 @@ class RelatedPosts {
 
             $views = $topic['views'] ?? 0;
             $likes = $topic['like_count'] ?? 0;
-            $replies = $topic['posts_count'] ?? 0;
+            $replies = max(0, ($topic['reply_count'] ?? $topic['posts_count'] ?? 1) - 1);
             
             $format = function($n) {
                 if ($n >= 1000) return round($n/1000, 1) . 'k';
@@ -144,20 +145,51 @@ class RelatedPosts {
             $likesStr = $format($likes);
             $repliesStr = $format($replies);
 
+            $postersHtml = '';
+            $posters = $topic['details']['participants'] ?? $topic['posters'] ?? [];
+            if ( !empty( $posters ) ) {
+                $posterAvatars = [];
+                $maxPosters = 3;
+                $posterCount = 0;
+                foreach ( $posters as $poster ) {
+                    if ( $posterCount >= $maxPosters ) break;
+                    $pUser = $poster['user'] ?? $poster ?? null;
+                    if ( $pUser && !empty( $pUser['avatar_template'] ) ) {
+                        $pAvatarPath = str_replace( '{size}', '40', $pUser['avatar_template'] );
+                        if ( !str_starts_with( $pAvatarPath, 'http' ) ) {
+                            $pAvatarPath = $baseUrl . (str_starts_with($pAvatarPath, '/') ? '' : '/') . $pAvatarPath;
+                        }
+                        $pAvatarUrl = htmlspecialchars( $pAvatarPath );
+                        $pUsernameSafe = htmlspecialchars( $pUser['username'] ?? '' );
+                        $zIndex = 10 - $posterCount;
+                        $posterAvatars[] = <<<HTML
+<img src="$pAvatarUrl" title="$pUsernameSafe" alt="$pUsernameSafe" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--background-color-base, #fff); margin-left: -8px; object-fit: cover; position: relative; z-index: $zIndex; background-color: var(--background-color-interactive-subtle, #eee);">
+HTML;
+                        $posterCount++;
+                    }
+                }
+                if ( !empty( $posterAvatars ) ) {
+                    $postersHtml = '<div style="display: flex; align-items: center; margin-left: 8px;">' . implode( '', $posterAvatars ) . '</div>';
+                }
+            }
+
             $statsHtml = <<<HTML
-            <div style="display: flex; gap: 16px; margin-top: 10px; font-size: 0.75rem; color: var(--color-subtle, #72777d); align-items: center;">
-                <div style="display: flex; align-items: center; gap: 4px;" title="$views views">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 -960 960 960" width="14" fill="currentColor" style="opacity: 0.8;"><path d="M607.5-372.5Q660-425 660-500t-52.5-127.5Q555-680 480-680t-127.5 52.5Q300-575 300-500t52.5 127.5Q405-320 480-320t127.5-52.5Zm-204-51Q372-455 372-500t31.5-76.5Q435-608 480-608t76.5 31.5Q588-545 588-500t-31.5 76.5Q525-392 480-392t-76.5-31.5ZM214-281.5Q94-363 40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200q-146 0-266-81.5Z"/></svg>
-                    <span>$viewsStr</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                <div style="display: flex; gap: 16px; font-size: 0.75rem; color: var(--color-subtle, #72777d); align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 4px;" title="$views views">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 -960 960 960" width="14" fill="currentColor" style="opacity: 0.8;"><path d="M607.5-372.5Q660-425 660-500t-52.5-127.5Q555-680 480-680t-127.5 52.5Q300-575 300-500t52.5 127.5Q405-320 480-320t127.5-52.5Zm-204-51Q372-455 372-500t31.5-76.5Q435-608 480-608t76.5 31.5Q588-545 588-500t-31.5 76.5Q525-392 480-392t-76.5-31.5ZM214-281.5Q94-363 40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200q-146 0-266-81.5Z"/></svg>
+                        <span>$viewsStr</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px;" title="$likes likes">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 -960 960 960" width="14" fill="currentColor" style="opacity: 0.8;"><path d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Z"/></svg>
+                         <span>$likesStr</span>
+                    </div>
+                     <div style="display: flex; align-items: center; gap: 4px;" title="$replies replies">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 -960 960 960" width="14" fill="currentColor" style="opacity: 0.8;"><path d="M80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Z"/></svg>
+                         <span>$repliesStr</span>
+                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 4px;" title="$likes likes">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 -960 960 960" width="14" fill="currentColor" style="opacity: 0.8;"><path d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Z"/></svg>
-                     <span>$likesStr</span>
-                </div>
-                 <div style="display: flex; align-items: center; gap: 4px;" title="$replies replies">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 -960 960 960" width="14" fill="currentColor" style="opacity: 0.8;"><path d="M80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Z"/></svg>
-                     <span>$repliesStr</span>
-                 </div>
+                $postersHtml
             </div>
 HTML;
 
@@ -180,8 +212,14 @@ HTML;
             if ( $previewImageUrl ) {
                 $previewImageUrlSafe = htmlspecialchars( $previewImageUrl );
                 $previewImageHtml = <<<HTML
-<div style="width: 100%; height: 160px; overflow: hidden; background-color: var(--background-color-interactive-subtle, #eee); border-bottom: 1px solid var(--border-color-subtle, #eaecf0); flex-shrink: 0;">
+<div class="discourse-related-card-image-wrapper" style="position: relative; overflow: hidden; width: 100%; height: 160px; background-color: var(--background-color-interactive-subtle, #eee); border-bottom: 1px solid var(--border-color-subtle, #eaecf0); flex-shrink: 0; border-radius: var(--border-radius-medium, 4px) var(--border-radius-medium, 4px) 0 0;">
     <img src="$previewImageUrlSafe" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
+    <div class="discourse-related-card-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.4); opacity: 0; transition: opacity 0.2s ease; z-index: 2; pointer-events: none;">
+        <span style="display: flex; align-items: center; gap: 6px; color: #fff; font-weight: 600; font-size: 0.875rem; background-color: rgba(0, 0, 0, 0.6); padding: 6px 10px; border-radius: 6px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
+            View on $siteName
+            <svg xmlns="http://www.w3.org/2000/svg" height="15" viewBox="0 -960 960 960" width="15" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"/></svg>
+        </span>
+    </div>
 </div>
 HTML;
             }
@@ -195,7 +233,7 @@ HTML;
 
 			$listItems .= <<<HTML
 <li title="$title" style="position: relative; list-style: none;">
-    <a href="$url" rel="$rel noopener noreferrer" $target style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;" aria-label="$title"></a>
+    <a href="$url" rel="$rel noopener noreferrer" $target style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;" aria-label="$title" onmouseenter="var o = this.nextElementSibling.querySelector('.discourse-related-card-overlay'); if(o) o.style.opacity=1;" onmouseleave="var o = this.nextElementSibling.querySelector('.discourse-related-card-overlay'); if(o) o.style.opacity=0;"></a>
 	<div class="cdx-card discourse-card" style="height: 100%; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; border-radius: var(--border-radius-medium, 4px); background-color: var(--background-color-base, #fff); border: 1px solid var(--border-color-subtle, #eaecf0);">
         $previewImageHtml
         <div style="display: flex; padding: 12px; flex: 1;">
@@ -292,8 +330,9 @@ HTML;
                 $topics = $data['topics'] ?? [];
                 $topicsMap = array_column( $topics, null, 'id' );
                 
-                // take top 3 unique topics, skipping system reply posts
+                // take top N unique topics, skipping system reply posts
                 // post_number 1 = OP, post_number > 1 = reply
+                $maxPosts = $this->config->getMaxRelatedPosts();
                 $seenTopics = [];
                 $candidates = [];
                 foreach ( $posts as $p ) {
@@ -306,7 +345,7 @@ HTML;
                     if ( !isset( $seenTopics[$tid] ) ) {
                         $seenTopics[$tid] = true;
                         $candidates[] = $p;
-                        if ( count( $candidates ) >= 3 ) break;
+                        if ( count( $candidates ) >= $maxPosts ) break;
                     }
                 }
 
@@ -318,7 +357,7 @@ HTML;
                         if ( !isset( $seenTopics[$tid] ) ) {
                             $seenTopics[$tid] = true;
                             $candidates[] = $p;
-                            if ( count( $candidates ) >= 3 ) break;
+                            if ( count( $candidates ) >= $maxPosts ) break;
                         }
                     }
                 }
@@ -331,9 +370,8 @@ HTML;
                 // get full topic/post info from the API for every selected topic
                 $results = [];
                 foreach ( $candidates as $candidate ) {
-                    $slug = $candidate['topic_slug'] ?? 'topic';
                     $id = $candidate['topic_id'];
-                    $topicUrl = "$baseUrl/t/$slug/$id.json";
+                    $topicUrl = "$baseUrl/t/$id.json";
                     
                     $success = false;
 
