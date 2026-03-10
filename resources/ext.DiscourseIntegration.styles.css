@@ -1,7 +1,6 @@
 .discourse-related-posts {
 	margin-top: 0px;
 	padding-inline: var(--padding-page, 1em);
-	padding: 0px;
 	display: flex;
 	justify-content: center;
 }
