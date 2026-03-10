@@ -25,7 +25,7 @@ class ExtensionConfig {
 	public const SITE_NAME = 'DiscourseSiteName';
 	public const SHOW_RELATED_POSTS = 'DiscourseShowRelatedPosts';
 
-	public const ROOT_FORUM_URL_FOR_NON_MAIN = 'DiscourseRootForumUrlForNonMain';
+	public const ROOT_FORUM_URL_FOR_NON_MAIN = 'DiscourseRootForumURLForNonMain';
 	public const CONSTRUCTOR_OPTIONS = [
 		self::API_KEY,
 		self::API_USERNAME,

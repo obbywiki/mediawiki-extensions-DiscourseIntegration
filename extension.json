@@ -136,7 +136,7 @@
 			"description": "Whether to show related posts at the bottom of the page."
 		},
 
-		"DiscourseRootForumUrlForNonMain": {
+		"DiscourseRootForumURLForNonMain": {
 			"value": false,
 			"description": "If true, non-main namespaces will link to the base forum URL instead of searching for the page title."
 		}

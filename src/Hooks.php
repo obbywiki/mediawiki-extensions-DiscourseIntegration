@@ -30,10 +30,10 @@ class Hooks  {
 		}
 
 		$isTargetNamespace = in_array( $namespace, $targetNamespaces );
-		$rootUrlForNonMain = $this->config->getRootForumUrlForNonMain();
+		$rootURLForNonMain = $this->config->getRootForumUrlForNonMain();
 
 		// Replace if it's a target namespace, OR if the root toggle is on and it's not main
-		if ( !$isTargetNamespace && !( $rootUrlForNonMain && $namespace !== 0 ) ) {
+		if ( !$isTargetNamespace && !( $rootURLForNonMain && $namespace !== 0 ) ) {
 			return;
 		}
 
@@ -56,7 +56,7 @@ class Hooks  {
 		}
 		$discourseUrl = rtrim( $discourseUrl, '/' );
 
-		if ( $rootUrlForNonMain && $namespace !== 0 ) {
+		if ( $rootURLForNonMain && $namespace !== 0 ) {
 			$href = $discourseUrl;
 		} else {
 			$href = $discourseUrl . '/search?q=' . urlencode( $titleText );
@@ -95,29 +95,21 @@ class Hooks  {
 			}
 		} else {
 			$found = false;
-			foreach ( $links as $group => $linksInGroup ) {
+			foreach ( $links as $group => &$linksInGroup ) {
 				if ( !is_array( $linksInGroup ) ) {
 					continue;
 				}
-				$keysToRemove = [];
-				foreach ( $linksInGroup as $key => $link ) {
+				foreach ( $linksInGroup as $key => &$link ) {
 					if (
 						$key === 'talk' ||
 						$key === 'discussion' ||
-						( is_array( $link ) && isset( $link['rel'] ) && $link['rel'] === 'discussion' ) ||
-						( is_array( $link ) && isset( $link['id'] ) && $link['id'] === 'ca-talk' ) ||
-						( is_string( $key ) && str_ends_with( $key, '_talk' ) )
+						( isset( $link['rel'] ) && $link['rel'] === 'discussion' ) ||
+						( isset( $link['id'] ) && $link['id'] === 'ca-talk' ) ||
+						str_ends_with( $key, '_talk' )
 					) {
-						if ( !$found ) {
-							$links[$group][$key] = $newLink;
-							$found = true;
-						} else {
-							$keysToRemove[] = $key;
-						}
+						$link = $newLink;
+						$found = true;
 					}
-				}
-				foreach ( $keysToRemove as $k ) {
-					unset( $links[$group][$k] );
 				}
 			}
 
