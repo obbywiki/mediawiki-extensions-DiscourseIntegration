@@ -18,13 +18,14 @@ class Hooks  {
 			return;
 		}
 
-		$targetNamespaces = $this->config->getTargetNamespaces() ?: [ 0 ];
+		$talkNamespaces = $this->config->getTalkNamespaces();
 		$title = $skin->getTitle();
-		if ( !in_array( $title->getNamespace(), $targetNamespaces ) ) {
+		if ( !in_array( $title->getNamespace(), $talkNamespaces ) ) {
 			return;
 		}
 
-        if ( !in_array( strtolower( $skin->getSkinName() ), $this->config->getTargetSkins() ) ) {
+        $skinName = strtolower( $skin->getSkinName() );
+        if ( !in_array( $skinName, $this->config->getTalkSkins() ) ) {
 			return;
 		}
 
@@ -54,9 +55,11 @@ class Hooks  {
 			'rel' => 'discussion',
 			'accesskey' => 't',
 			'id' => 'ca-talk',
-			'class' => ''
+			'class' => 'discourse-talk-link'
 		];
         
+        $skin->getOutput()->addModuleStyles( [ 'ext.DiscourseIntegration.styles' ] );
+
         if ( isset( $links['associated-pages'] ) ) {
             $links['associated-pages']['talk'] = $newLink;
             if ( isset( $links['associated-pages']['discussion'] ) ) {

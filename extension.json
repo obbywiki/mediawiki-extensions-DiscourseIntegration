@@ -4,7 +4,7 @@
     "name": "DiscourseIntegration",
     "description": "Integrates Discourse with MediaWiki",
     "author": ["[https://obbywiki.com ObbyWiki]", "WOU", "Wolfite"],
-    "version": "0.2.0",
+    "version": "0.2.1",
     "license-name": "MIT",
     "url": "https://github.com/obbywiki/mediawiki-extensions-DiscourseIntegration",
 
@@ -60,7 +60,8 @@
 
     "ResourceModules": {
         "ext.DiscourseIntegration.styles": {
-            "styles": "resources/styles.css",
+            "localBasePath": "resources",
+            "styles": "ext.DiscourseIntegration.styles.css",
             "targets": [ "desktop", "mobile" ]
         }
     },
@@ -129,6 +130,26 @@
 		"DiscourseSiteName": {
 			"value": "Discourse",
 			"description": "Name of the forum to display in the hover overlay."
+		},
+		"DiscourseShowRelatedPosts": {
+			"value": true,
+			"description": "Whether to show related posts at the bottom of the page."
+		},
+		"DiscourseTalkNamespaces": {
+			"value": null,
+			"description": "Specific namespaces where talk pages should be replaced. If null, uses DiscourseTargetNamespaces."
+		},
+		"DiscoursePostsNamespaces": {
+			"value": null,
+			"description": "Specific namespaces where related posts should be shown. If null, uses DiscourseTargetNamespaces."
+		},
+		"DiscourseTalkSkins": {
+			"value": null,
+			"description": "Specific skins where talk pages should be replaced. If null, uses DiscourseTargetSkins."
+		},
+		"DiscoursePostsSkins": {
+			"value": null,
+			"description": "Specific skins where related posts should be shown. If null, uses DiscourseTargetSkins."
 		}
 	}
 }

@@ -42,8 +42,19 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 * `$wgDiscourseTopicSortOrder` - default `""` - Sort order for related topics. When empty, searches by relevance. Accepts values like `"latest"`, `"likes"`, `"views"`.
 * `$wgDiscourseMaxRelatedPosts` - default `3` - Maximum number of related posts to display.
 * `$wgDiscourseSiteName` - default `"Discourse"` - Name of the forum to display on hover over related posts.
+* `$wgDiscourseShowRelatedPosts` - default `TRUE` - Whether to show related posts at the bottom of the page.
+* `$wgDiscourseTalkNamespaces` - default `NULL` - Specific namespaces to replace talk pages in. Fallback to `$wgDiscourseTargetNamespaces`.
+* `$wgDiscoursePostsNamespaces` - default `NULL` - Specific namespaces to show related posts in. Fallback to `$wgDiscourseTargetNamespaces`.
+* `$wgDiscourseTalkSkins` - default `NULL` - Specific skins to replace talk pages in. Fallback to `$wgDiscourseTargetSkins`.
+* `$wgDiscoursePostsSkins` - default `NULL` - Specific skins to show related posts in. Fallback to `$wgDiscourseTargetSkins`.
 
 ## Changelog
+
+### 0.2.1
+
+* **Configuration separation**: Added separate controls for talk page replacement and related posts via `$wgDiscourseTalkNamespaces`, `$wgDiscoursePostsNamespaces`, etc.
+* **Skin enhancement**: The Discourse logo now replaces the talk icon on the Citizen skin for a more integrated feel.
+* **New Toggle**: Added `$wgDiscourseShowRelatedPosts` to explicitly enable/disable the related posts section independent of other features.
 
 ### 0.2.0
 
@@ -58,7 +69,5 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 
 * Potentially delay paint until user scrolls to the bottom like RelatedArticles
 * Add option to replace talk links in all non-targetted namespaces with a Discourse link
-* Potentially replace talk icon with Discourse logo on some skins (Citizen)
-* More control and separation configurations for extension functionality like replacing talk pages and displaying posts (currently, it can be either all or nothing)
 * Ability to customize cache TTL by category and page size
 * Support for solved posts

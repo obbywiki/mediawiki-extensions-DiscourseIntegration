@@ -37,12 +37,16 @@ class RelatedPosts {
 			return;
 		}
 
-		$targetNamespaces = $this->config->getTargetNamespaces();
-		if ( !in_array( $skin->getTitle()->getNamespace(), $targetNamespaces ) ) {
+		if ( !$this->config->getShowRelatedPosts() ) {
+			return;
+		}
+
+		$postsNamespaces = $this->config->getPostsNamespaces();
+		if ( !in_array( $skin->getTitle()->getNamespace(), $postsNamespaces ) ) {
 			return;
 		}
         
-		if ( !in_array( strtolower( $skin->getSkinName() ), $this->config->getTargetSkins() ) ) {
+		if ( !in_array( strtolower( $skin->getSkinName() ), $this->config->getPostsSkins() ) ) {
 			return;
 		}
 
@@ -76,6 +80,8 @@ class RelatedPosts {
 		
 		$baseUrl = rtrim( $this->config->getBaseUrl(), '/' );
 		$siteName = htmlspecialchars( $this->config->getSiteName() );
+		$isSquarePFPForAll = $this->config->getSquarePFPForAll();
+		$squarePFPUsers = $this->config->getSquarePFPForUsersWithTitles();
 
 		$listItems = '';
 		foreach ( $results as $item ) {
@@ -103,7 +109,7 @@ class RelatedPosts {
             $blurbText = $post['blurb'] ?? '';
             $blurbHtml = nl2br( htmlspecialchars( $blurbText ) );
 
-            $pfpBorderRadius = ($this->config->getSquarePFPForAll() || in_array(($post['user_title'] ?? ''), $this->config->getSquarePFPForUsersWithTitles())) ? '10%' : '50%';
+            $pfpClass = ($isSquarePFPForAll || in_array(($post['user_title'] ?? ''), $squarePFPUsers)) ? 'discourse-pfp-square' : 'discourse-pfp-circle';
             $rel = $this->config->getUseNoFollowOnForumLinks() ? 'nofollow' : '';
             $target = $this->config->getOpenForumLinksInNewTab() ? 'target="_blank"' : '';
 
@@ -125,10 +131,10 @@ class RelatedPosts {
                     
                     $tagUrl = htmlspecialchars( "$baseUrl/tag/$tagName" );
                     $tagSafe = htmlspecialchars( $tagName );
-                    $tagLinks[] = "<a href=\"$tagUrl\" style=\"position: relative; z-index: 2; text-decoration: none; color: var(--color-primary, #36c); background: var(--background-color-interactive-subtle, #f8f9fa); padding: 2px 8px; border-radius: var(--border-radius-medium, 4px); font-size: 0.75rem; font-weight: 500;\">$tagSafe</a>";
+                    $tagLinks[] = "<a href=\"$tagUrl\" class=\"discourse-tag\">$tagSafe</a>";
                 }
                 if ( !empty( $tagLinks ) ) {
-                    $tagsHtml = '<div style="margin-top: 8px; gap: 6px; display: flex; flex-wrap: wrap;">' . implode( '', $tagLinks ) . '</div>';
+                    $tagsHtml = '<div class="discourse-tags-container">' . implode( '', $tagLinks ) . '</div>';
                 }
             }
 
@@ -163,29 +169,29 @@ class RelatedPosts {
                         $pUsernameSafe = htmlspecialchars( $pUser['username'] ?? '' );
                         $zIndex = 10 - $posterCount;
                         $posterAvatars[] = <<<HTML
-<img src="$pAvatarUrl" title="$pUsernameSafe" alt="$pUsernameSafe" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--background-color-base, #fff); margin-left: -8px; object-fit: cover; position: relative; z-index: $zIndex; background-color: var(--background-color-interactive-subtle, #eee);">
+<img src="$pAvatarUrl" title="$pUsernameSafe" alt="$pUsernameSafe" class="discourse-poster-avatar" style="z-index: $zIndex;">
 HTML;
                         $posterCount++;
                     }
                 }
                 if ( !empty( $posterAvatars ) ) {
-                    $postersHtml = '<div style="display: flex; align-items: center; margin-left: 8px;">' . implode( '', $posterAvatars ) . '</div>';
+                    $postersHtml = '<div class="discourse-posters-container">' . implode( '', $posterAvatars ) . '</div>';
                 }
             }
 
             $statsHtml = <<<HTML
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                <div style="display: flex; gap: 16px; font-size: 0.75rem; color: var(--color-subtle, #72777d); align-items: center;">
-                    <div style="display: flex; align-items: center; gap: 4px;" title="$views views">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 -960 960 960" width="14" fill="currentColor" style="opacity: 0.8;"><path d="M607.5-372.5Q660-425 660-500t-52.5-127.5Q555-680 480-680t-127.5 52.5Q300-575 300-500t52.5 127.5Q405-320 480-320t127.5-52.5Zm-204-51Q372-455 372-500t31.5-76.5Q435-608 480-608t76.5 31.5Q588-545 588-500t-31.5 76.5Q525-392 480-392t-76.5-31.5ZM214-281.5Q94-363 40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200q-146 0-266-81.5Z"/></svg>
+            <div class="discourse-stats-container">
+                <div class="discourse-stats-left">
+                    <div class="discourse-stat-item" title="$views views">
+                        <svg class="discourse-stat-icon" xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 -960 960 960" width="14" fill="currentColor"><path d="M607.5-372.5Q660-425 660-500t-52.5-127.5Q555-680 480-680t-127.5 52.5Q300-575 300-500t52.5 127.5Q405-320 480-320t127.5-52.5Zm-204-51Q372-455 372-500t31.5-76.5Q435-608 480-608t76.5 31.5Q588-545 588-500t-31.5 76.5Q525-392 480-392t-76.5-31.5ZM214-281.5Q94-363 40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200q-146 0-266-81.5Z"/></svg>
                         <span>$viewsStr</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 4px;" title="$likes likes">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 -960 960 960" width="14" fill="currentColor" style="opacity: 0.8;"><path d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Z"/></svg>
+                    <div class="discourse-stat-item" title="$likes likes">
+                        <svg class="discourse-stat-icon" xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 -960 960 960" width="14" fill="currentColor"><path d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Z"/></svg>
                          <span>$likesStr</span>
                     </div>
-                     <div style="display: flex; align-items: center; gap: 4px;" title="$replies replies">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 -960 960 960" width="14" fill="currentColor" style="opacity: 0.8;"><path d="M80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Z"/></svg>
+                     <div class="discourse-stat-item" title="$replies replies">
+                        <svg class="discourse-stat-icon" xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 -960 960 960" width="14" fill="currentColor"><path d="M80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Z"/></svg>
                          <span>$repliesStr</span>
                      </div>
                 </div>
@@ -202,7 +208,7 @@ HTML;
                 }
                 $avatarUrl = htmlspecialchars( $avatarPath );
                 $thumbnailHtml = <<<HTML
-<img src="$avatarUrl" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+<img src="$avatarUrl" alt="" class="discourse-avatar-img">
 HTML;
             }
 
@@ -212,10 +218,10 @@ HTML;
             if ( $previewImageUrl ) {
                 $previewImageUrlSafe = htmlspecialchars( $previewImageUrl );
                 $previewImageHtml = <<<HTML
-<div class="discourse-related-card-image-wrapper" style="position: relative; overflow: hidden; width: 100%; height: 160px; background-color: var(--background-color-interactive-subtle, #eee); border-bottom: 1px solid var(--border-color-subtle, #eaecf0); flex-shrink: 0; border-radius: var(--border-radius-medium, 4px) var(--border-radius-medium, 4px) 0 0;">
-    <img src="$previewImageUrlSafe" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
-    <div class="discourse-related-card-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.4); opacity: 0; transition: opacity 0.2s ease; z-index: 2; pointer-events: none;">
-        <span style="display: flex; align-items: center; gap: 6px; color: #fff; font-weight: 600; font-size: 0.875rem; background-color: rgba(0, 0, 0, 0.6); padding: 6px 10px; border-radius: 6px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
+<div class="discourse-related-card-image-wrapper">
+    <img src="$previewImageUrlSafe" alt="" class="discourse-preview-img">
+    <div class="discourse-related-card-overlay">
+        <span class="discourse-overlay-content">
             View on $siteName
             <svg xmlns="http://www.w3.org/2000/svg" height="15" viewBox="0 -960 960 960" width="15" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"/></svg>
         </span>
@@ -226,30 +232,30 @@ HTML;
 
             // meta
             $meta = [];
-            if ( $name ) { $meta[] = htmlspecialchars( $name ) . ' <span style="opacity: 0.6;">@' . htmlspecialchars( $username ) . '</span>'; }
+            if ( $name ) { $meta[] = htmlspecialchars( $name ) . ' <span class="discourse-meta-username">@' . htmlspecialchars( $username ) . '</span>'; }
             else if ( $username ) { $meta[] = '@' . htmlspecialchars( $username ); };
             $meta[] = $date;
             $metaStr = implode( ' &bull; ', $meta );
 
 			$listItems .= <<<HTML
-<li title="$title" style="position: relative; list-style: none;">
-    <a href="$url" rel="$rel noopener noreferrer" $target style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;" aria-label="$title" onmouseenter="var o = this.nextElementSibling.querySelector('.discourse-related-card-overlay'); if(o) o.style.opacity=1;" onmouseleave="var o = this.nextElementSibling.querySelector('.discourse-related-card-overlay'); if(o) o.style.opacity=0;"></a>
-	<div class="cdx-card discourse-card" style="height: 100%; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; border-radius: var(--border-radius-medium, 4px); background-color: var(--background-color-base, #fff); border: 1px solid var(--border-color-subtle, #eaecf0);">
+<li title="$title" class="discourse-card-wrapper">
+    <a href="$url" rel="$rel noopener noreferrer" $target class="discourse-card-link" aria-label="$title"></a>
+	<div class="cdx-card discourse-card">
         $previewImageHtml
-        <div style="display: flex; padding: 12px; flex: 1;">
-            <div style="border-radius: $pfpBorderRadius; overflow: hidden; height: 40px; width: 40px; min-width: 40px; margin-right: 12px; align-self: start; flex-shrink: 0; background-color: var(--background-color-interactive-subtle, #eee);">
+        <div class="discourse-card-body">
+            <div class="discourse-card-pfp-wrapper $pfpClass">
                 $thumbnailHtml
             </div>
-            <div class="cdx-card__text" style="display: flex; flex-direction: column; width: 100%;">
-                <span class="cdx-card__text__title" style="text-decoration: none; color: inherit; font-weight: 600; line-height: 1.3; font-size: 1rem; display: block; margin-bottom: 4px;">
+            <div class="cdx-card__text discourse-card-text-wrapper">
+                <span class="cdx-card__text__title discourse-card-title">
                     <span class="cdx-card__text__title__content">$title</span>
                 </span>
-                <div style="font-size: 0.75rem; color: var(--color-subtle, #72777d); margin-bottom: 6px;">$metaStr</div>
-                <div style="font-size: 0.875rem; color: var(--color-base, #202122); line-height: 1.4; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;">
+                <div class="discourse-card-meta-new">$metaStr</div>
+                <div class="discourse-card-blurb">
                     $blurbHtml
                 </div>
                 $tagsHtml
-                <div style="margin-top: auto; padding-top: 8px;">
+                <div class="discourse-card-footer">
                     $statsHtml
                 </div>
             </div>
@@ -262,11 +268,15 @@ HTML;
 		$heading = wfMessage( 'discourseintegration-related-posts' )->escaped();
 
 		return <<<HTML
-<aside class="discourse-related-posts noprint" style="max-width: var(--width-page, 100%); margin: 2em auto; margin-top: 0px; padding-inline: var(--padding-page, 1em);">
-	<h2 class="read-more-container-heading" style="margin-bottom: 16px;">$heading</h2>
-	<ul style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; list-style: none; margin: 0; padding: 0;">
-		$listItems
-	</ul>
+<aside class="discourse-related-posts">
+	<div class="discourse-related-posts-container">
+        <div class="noprint">
+            <h2 class="read-more-container-heading discourse-related-heading">$heading</h2>
+            <ul class="discourse-card-list">
+                $listItems
+            </ul>
+        </div>  
+    </div>
 </aside>
 HTML;
 	}

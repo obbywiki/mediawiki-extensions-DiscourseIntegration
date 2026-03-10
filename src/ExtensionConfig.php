@@ -23,6 +23,11 @@ class ExtensionConfig {
 	public const TOPIC_SORT_ORDER = 'DiscourseTopicSortOrder';
 	public const MAX_RELATED_POSTS = 'DiscourseMaxRelatedPosts';
 	public const SITE_NAME = 'DiscourseSiteName';
+	public const SHOW_RELATED_POSTS = 'DiscourseShowRelatedPosts';
+	public const TALK_NAMESPACES = 'DiscourseTalkNamespaces';
+	public const POSTS_NAMESPACES = 'DiscoursePostsNamespaces';
+	public const TALK_SKINS = 'DiscourseTalkSkins';
+	public const POSTS_SKINS = 'DiscoursePostsSkins';
 	public const CONSTRUCTOR_OPTIONS = [
 		self::API_KEY,
 		self::API_USERNAME,
@@ -40,6 +45,11 @@ class ExtensionConfig {
 		self::TOPIC_SORT_ORDER,
 		self::MAX_RELATED_POSTS,
 		self::SITE_NAME,
+		self::SHOW_RELATED_POSTS,
+		self::TALK_NAMESPACES,
+		self::POSTS_NAMESPACES,
+		self::TALK_SKINS,
+		self::POSTS_SKINS,
 	];
 
 	public function __construct(
@@ -118,5 +128,25 @@ class ExtensionConfig {
 
 	public function getSiteName(): string {
 		return $this->options->get( self::SITE_NAME ) ?: 'Discourse';
+	}
+
+	public function getShowRelatedPosts(): bool {
+		return (bool)$this->options->get( self::SHOW_RELATED_POSTS );
+	}
+
+	public function getTalkNamespaces(): array {
+		return $this->options->get( self::TALK_NAMESPACES ) ?? $this->getTargetNamespaces();
+	}
+
+	public function getPostsNamespaces(): array {
+		return $this->options->get( self::POSTS_NAMESPACES ) ?? $this->getTargetNamespaces();
+	}
+
+	public function getTalkSkins(): array {
+		return $this->options->get( self::TALK_SKINS ) ?? $this->getTargetSkins();
+	}
+
+	public function getPostsSkins(): array {
+		return $this->options->get( self::POSTS_SKINS ) ?? $this->getTargetSkins();
 	}
 }
