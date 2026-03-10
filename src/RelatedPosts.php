@@ -41,12 +41,12 @@ class RelatedPosts {
 			return;
 		}
 
-		$postsNamespaces = $this->config->getPostsNamespaces();
-		if ( !in_array( $skin->getTitle()->getNamespace(), $postsNamespaces ) ) {
+		$targetNamespaces = $this->config->getTargetNamespaces();
+		if ( !in_array( $skin->getTitle()->getNamespace(), $targetNamespaces ) ) {
 			return;
 		}
         
-		if ( !in_array( strtolower( $skin->getSkinName() ), $this->config->getPostsSkins() ) ) {
+		if ( !in_array( strtolower( $skin->getSkinName() ), $this->config->getTargetSkins() ) ) {
 			return;
 		}
 

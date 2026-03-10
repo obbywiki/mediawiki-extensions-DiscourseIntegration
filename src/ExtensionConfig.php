@@ -14,7 +14,7 @@ class ExtensionConfig {
 	public const TARGET_NAMESPACES = 'DiscourseTargetNamespaces';
     public const TARGET_SKINS = 'DiscourseTargetSkins';
 	public const EXCLUDE_STRINGS = 'DiscourseExcludeStrings';
-    public const EXCLUDE_PAGES = 'DiscourseExcludePages';
+	public const EXCLUDE_PAGES = 'DiscourseExcludePages';
 	public const SQUARE_PFP_FOR_ALL = 'DiscourseSquarePFPsForAll';
 	public const SQUARE_PFP_FOR_USERS_WITH_TITLES = 'DiscourseSquarePFPsForUsersWithTitles';
     public const USE_NO_FOLLOW_ON_FORUM_LINKS = 'DiscourseUseNoFollowOnForumLinks';
@@ -24,10 +24,8 @@ class ExtensionConfig {
 	public const MAX_RELATED_POSTS = 'DiscourseMaxRelatedPosts';
 	public const SITE_NAME = 'DiscourseSiteName';
 	public const SHOW_RELATED_POSTS = 'DiscourseShowRelatedPosts';
-	public const TALK_NAMESPACES = 'DiscourseTalkNamespaces';
-	public const POSTS_NAMESPACES = 'DiscoursePostsNamespaces';
-	public const TALK_SKINS = 'DiscourseTalkSkins';
-	public const POSTS_SKINS = 'DiscoursePostsSkins';
+
+	public const ROOT_FORUM_URL_FOR_NON_MAIN = 'DiscourseRootForumUrlForNonMain';
 	public const CONSTRUCTOR_OPTIONS = [
 		self::API_KEY,
 		self::API_USERNAME,
@@ -46,10 +44,8 @@ class ExtensionConfig {
 		self::MAX_RELATED_POSTS,
 		self::SITE_NAME,
 		self::SHOW_RELATED_POSTS,
-		self::TALK_NAMESPACES,
-		self::POSTS_NAMESPACES,
-		self::TALK_SKINS,
-		self::POSTS_SKINS,
+
+		self::ROOT_FORUM_URL_FOR_NON_MAIN,
 	];
 
 	public function __construct(
@@ -134,19 +130,9 @@ class ExtensionConfig {
 		return (bool)$this->options->get( self::SHOW_RELATED_POSTS );
 	}
 
-	public function getTalkNamespaces(): array {
-		return $this->options->get( self::TALK_NAMESPACES ) ?? $this->getTargetNamespaces();
-	}
 
-	public function getPostsNamespaces(): array {
-		return $this->options->get( self::POSTS_NAMESPACES ) ?? $this->getTargetNamespaces();
-	}
 
-	public function getTalkSkins(): array {
-		return $this->options->get( self::TALK_SKINS ) ?? $this->getTargetSkins();
-	}
-
-	public function getPostsSkins(): array {
-		return $this->options->get( self::POSTS_SKINS ) ?? $this->getTargetSkins();
+	public function getRootForumUrlForNonMain(): bool {
+		return (bool)$this->options->get( self::ROOT_FORUM_URL_FOR_NON_MAIN );
 	}
 }

@@ -135,21 +135,10 @@
 			"value": true,
 			"description": "Whether to show related posts at the bottom of the page."
 		},
-		"DiscourseTalkNamespaces": {
-			"value": null,
-			"description": "Specific namespaces where talk pages should be replaced. If null, uses DiscourseTargetNamespaces."
-		},
-		"DiscoursePostsNamespaces": {
-			"value": null,
-			"description": "Specific namespaces where related posts should be shown. If null, uses DiscourseTargetNamespaces."
-		},
-		"DiscourseTalkSkins": {
-			"value": null,
-			"description": "Specific skins where talk pages should be replaced. If null, uses DiscourseTargetSkins."
-		},
-		"DiscoursePostsSkins": {
-			"value": null,
-			"description": "Specific skins where related posts should be shown. If null, uses DiscourseTargetSkins."
+
+		"DiscourseRootForumUrlForNonMain": {
+			"value": false,
+			"description": "If true, non-main namespaces will link to the base forum URL instead of searching for the page title."
 		}
 	}
 }
