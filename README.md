@@ -43,12 +43,16 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 * `$wgDiscourseMaxRelatedPosts` - default `3` - Maximum number of related posts to display.
 * `$wgDiscourseSiteName` - default `"Discourse"` - Name of the forum to display on hover over related posts.
 * `$wgDiscourseShowRelatedPosts` - default `TRUE` - Whether to show related posts at the bottom of the page.
-* `$wgDiscourseTalkNamespaces` - default `NULL` - Specific namespaces to replace talk pages in. Fallback to `$wgDiscourseTargetNamespaces`.
-* `$wgDiscoursePostsNamespaces` - default `NULL` - Specific namespaces to show related posts in. Fallback to `$wgDiscourseTargetNamespaces`.
-* `$wgDiscourseTalkSkins` - default `NULL` - Specific skins to replace talk pages in. Fallback to `$wgDiscourseTargetSkins`.
-* `$wgDiscoursePostsSkins` - default `NULL` - Specific skins to show related posts in. Fallback to `$wgDiscourseTargetSkins`.
+* `$wgDiscourseRootForumURLForNonMain` - default `FALSE` - If true, non-main namespaces will link to the base forum URL instead of searching for the page title. If false, they will use the default talk pages.
 
 ## Changelog
+
+### 0.2.2
+
+* **Image headers**: Added support for images in posts
+* **Tidy up configuration**: Simplified configuration options by removing `$wgDiscourseTalkNamespaces`, `$wgDiscoursePostsNamespaces`, `$wgDiscourseTalkSkins`, and `$wgDiscoursePostsSkins` and replacing them with `$wgDiscourseRootForumURLForNonMain`.
+* **Fix**: Fixed an issue where the talk page link was not replaced in non-target namespaces even with configurations.
+* **Fixed styles**: Certain styles were not applied correctly. Also simplified styles into the dedicated css resource file. Also aligns and matches with the Related Articles extension better.
 
 ### 0.2.1
 
@@ -68,6 +72,5 @@ Replaces the Discussion/Talk Page button with a link to your Discourse forum and
 ## TODO
 
 * Potentially delay paint until user scrolls to the bottom like RelatedArticles
-* Add option to replace talk links in all non-targetted namespaces with a Discourse link
 * Ability to customize cache TTL by category and page size
 * Support for solved posts
