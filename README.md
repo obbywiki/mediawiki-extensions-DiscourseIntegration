@@ -1,5 +1,8 @@
 # DiscourseIntegration (BETA)
 
+> [!NOTE]
+> This extension is unmaintained as of the 23rd of June, 2026. Consider using an alternative instead, such as [utdrwiki/discussions](https://github.com/utdrwiki/discussions).
+
 Some parts of the implementation were inspired by the [utdrwiki/discussion](https://github.com/utdrwiki/discussion) extension.
 
 This extension is in BETA. It has been tested on MediaWiki 1.46 and Discourse Latest. Best results on [Citizen](https://www.mediawiki.org/wiki/Skin:Citizen), Vector22 tested and working.
